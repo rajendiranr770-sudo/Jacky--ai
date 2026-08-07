@@ -7,53 +7,86 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-<h1>🤖 Jacky AI</h1>
-<p>உங்கள் AI உதவியாளர்</p>
-</header>
+<header><h1>🤖 Jacky AI</h1><p>உங்கள் AI உதவியாளர்</p></header>
 
 <nav>
 <button onclick="showPage('home')">🏠 முகப்பு</button>
 <button onclick="showPage('ai')">💬 AI</button>
 <button onclick="showPage('salary')">💵 சம்பளம்</button>
-<button onclick="showPage('purchase')">📊 கொள்முதல்</button>
+<button onclick="showPage('farm')">🌾 கொல்லை</button>
+<button onclick="showPage('homeAccount')">🏠 வீடு</button>
+<button onclick="showPage('interest')">📊 வட்டி</button>
+<button onclick="showPage('notepad')">📌 நோட்பேட்</button>
 </nav>
 
 <main>
-<section id="home" class="page active">
-<h2>வணக்கம் 👋</h2>
-<p>Jacky AI-க்கு வரவேற்கிறோம்.</p>
-</section>
+<section id="home" class="page active"><div class="card">
+<h2>வணக்கம் 👋</h2><p>Jacky AI-க்கு வரவேற்கிறோம்.</p>
+<p class="muted">சம்பளம், கொல்லை, வீடு, வட்டி மற்றும் நோட்பேட் கணக்குகள் இங்கே உள்ளன.</p>
+</div></section>
 
-<section id="ai" class="page">
+<section id="ai" class="page"><div class="card">
 <h2>💬 Jacky AI Assistant</h2>
-<div id="chatBox" class="chat-box">
-<div class="message ai">வணக்கம்! உங்கள் கேள்வியை உள்ளிடுங்கள்.</div>
-</div>
+<div id="chatBox" class="chat-box"><div class="message ai">வணக்கம்! உங்கள் கேள்வியை உள்ளிடுங்கள்.</div></div>
 <div id="status">🎤 மைக் ஆஃப்</div>
 <textarea id="textInput" placeholder="உங்கள் கேள்வி..."></textarea>
 <button onclick="sendMessage()">📤 அனுப்பு</button>
 <button onclick="startListening()">🎤 மைக் ஆன்</button>
 <button onclick="stopListening()">⏹️ மைக் நிறுத்து</button>
 <button onclick="clearChat()">🗑️ அழி</button>
-</section>
+</div></section>
 
-<section id="salary" class="page">
-<h2>💵 சம்பளம்</h2>
-<input type="number" id="salaryAmount" placeholder="சம்பளம்">
-<button onclick="calculateSalary()">கணக்கிடு</button>
-<div id="salaryResult"></div>
-</section>
+<section id="salary" class="page"><div class="card">
+<h2>💵 சம்பளக் கணக்கு</h2>
+<div class="balance">மீதி: ₹<span id="salaryBalance">0</span></div>
+<input type="number" id="salaryAmount" placeholder="தொகை">
+<input type="text" id="salaryNote" placeholder="குறிப்பு">
+<button onclick="addSalary('in')">➕ வரவு</button>
+<button onclick="addSalary('out')">➖ செலவு</button>
+<div id="salaryList" class="list"></div>
+</div></section>
 
-<section id="purchase" class="page">
-<h2>📊 கொள்முதல்</h2>
-<input type="text" id="productName" placeholder="பொருள்">
-<input type="number" id="productPrice" placeholder="விலை">
-<button onclick="addPurchase()">சேர்</button>
-<div id="purchaseResult"></div>
-</section>
+<section id="farm" class="page"><div class="card">
+<h2>🌾 கொல்லைச் செலவு</h2>
+<div class="balance">மொத்த செலவு: ₹<span id="farmTotal">0</span></div>
+<input type="text" id="farmNote" placeholder="எதற்காக? உதா: உரம்">
+<input type="number" id="farmAmount" placeholder="தொகை">
+<button onclick="addFarm()">➕ சேர்</button>
+<div id="farmList" class="list"></div>
+</div></section>
+
+<section id="homeAccount" class="page"><div class="card">
+<h2>🏠 வீட்டுக் கணக்கு</h2>
+<div class="balance">மீதி: ₹<span id="homeBalance">0</span><br>
+<small>வரவு ₹<span id="homeIn">0</span> | செலவு ₹<span id="homeOut">0</span></small></div>
+<input type="text" id="homeNote" placeholder="குறிப்பு">
+<input type="number" id="homeAmount" placeholder="தொகை">
+<button onclick="addHome('in')">➕ வரவு</button>
+<button onclick="addHome('out')">➖ செலவு</button>
+<div id="homeList" class="list"></div>
+</div></section>
+
+<section id="interest" class="page"><div class="card">
+<h2>📊 வட்டி கணக்கு</h2>
+<input type="text" id="loanName" placeholder="பெயர்">
+<input type="number" id="loanAmount" placeholder="முதல்தொகை ₹">
+<input type="number" id="loanRate" placeholder="மாத வட்டி %">
+<button onclick="addLoan()">➕ சேர்</button>
+<div id="loanList" class="list"></div>
+</div></section>
+
+<section id="notepad" class="page"><div class="card">
+<h2>📌 நோட்பேட்</h2>
+<h3>⏱️ தற்காலிக நோட்பேட்</h3>
+<input type="text" id="tempText" placeholder="தற்காலிக குறிப்பு">
+<button onclick="addTemp()">➕ சேர்</button>
+<div id="tempList" class="list"></div>
+<h3>📌 நிரந்தர நோட்பேட்</h3>
+<input type="text" id="permText" placeholder="நிரந்தர குறிப்பு">
+<button onclick="addPerm()">➕ சேர்</button>
+<div id="permList" class="list"></div>
+</div></section>
 </main>
-
 <script src="app.js"></script>
 </body>
 </html>
