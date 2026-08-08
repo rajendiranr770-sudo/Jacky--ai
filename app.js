@@ -1,118 +1,47 @@
 /* =========================================================
-   JACKY AI - SMART PA
-   Full Application JavaScript
+   JACKY AI - Smart PA
+   app.js v6
    ========================================================= */
 
-"use strict";
-
-/* =========================================================
-   DATABASE
-   ========================================================= */
-
-const DB_KEY = "balaji_pa_db_v12";
+const DB_KEY = "jacky_ai_db_v6";
 
 let db = {
-  salaryIn: 0,
-  salaryOut: 0,
-  salaryLogs: [],
+  salary: {
+    income: 0,
+    expense: 0,
+    logs: []
+  },
 
-  homeIn: 0,
-  homeOut: 0,
-  homeLogs: [],
+  home: {
+    income: 0,
+    expense: 0,
+    logs: []
+  },
 
-  farmLogs: [],
+  farm: {
+    income: 0,
+    expense: 0,
+    logs: []
+  },
 
-  expenseLogs: [],
+  expenses: [],
 
   loans: [],
 
-  temps: [],
-  perms: [],
+  notes: {
+    temp: [],
+    perm: []
+  },
 
   reminders: [],
-
-  chat: [],
 
   lastAction: null
 };
 
 
 /* =========================================================
-   BASIC HELPERS
+   LOAD / SAVE
    ========================================================= */
-
-function money(n){
-
-  n = Number(n) || 0;
-
-  return n.toLocaleString("en-IN",{
-    maximumFractionDigits:2
-  });
-
-}
-
-
-function nowText(){
-
-  return new Date().toLocaleString("en-IN",{
-    day:"2-digit",
-    month:"2-digit",
-    year:"numeric",
-    hour:"numeric",
-    minute:"2-digit"
-  });
-
-}
-
-
-function todayDate(){
-
-  const d = new Date();
-
-  const y = d.getFullYear();
-
-  const m = String(d.getMonth()+1).padStart(2,"0");
-
-  const day = String(d.getDate()).padStart(2,"0");
-
-  return `${y}-${m}-${day}`;
-
-}
-
-
-function escapeHTML(text){
-
-  return String(text ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-
-}
-
-
-/* =========================================================
-   SAVE / LOAD
-   ========================================================= */
-
-function saveDB(){
-
-  try{
-
-    localStorage.setItem(
-      DB_KEY,
-      JSON.stringify(db)
-    );
-
-  }catch(e){
-
-    console.error("Save error:",e);
-
-  }
-
-}
-
 
 function loadDB(){
 
@@ -122,119 +51,104 @@ function loadDB(){
 
     if(saved){
 
-      const parsed = JSON.parse(saved);
+      const old = JSON.parse(saved);
 
-      db = normalizeDB(parsed);
+      db = Object.assign(db, old);
 
-      return;
+      db.salary = Object.assign({
+        income:0,
+        expense:0,
+        logs:[]
+      }, db.salary || {});
 
-    }
+      db.home = Object.assign({
+        income:0,
+        expense:0,
+        logs:[]
+      }, db.home || {});
 
-    /*
-      பழைய version data இருந்தால் எடுத்துக்கொள்ள முயற்சி.
-    */
+      db.farm = Object.assign({
+        income:0,
+        expense:0,
+        logs:[]
+      }, db.farm || {});
 
-    const old = localStorage.getItem("balaji_pa_db_v12");
+      db.expenses = Array.isArray(db.expenses)
+        ? db.expenses : [];
 
-    if(old){
+      db.loans = Array.isArray(db.loans)
+        ? db.loans : [];
 
-      const parsed = JSON.parse(old);
+      db.notes = Object.assign({
+        temp:[],
+        perm:[]
+      }, db.notes || {});
 
-      db = normalizeDB(parsed);
-
-      saveDB();
-
-      return;
+      db.reminders = Array.isArray(db.reminders)
+        ? db.reminders : [];
 
     }
 
   }catch(e){
 
-    console.error("Load error:",e);
+    console.log("DB load error",e);
 
   }
-
-  db = normalizeDB(db);
 
 }
 
 
-function normalizeDB(x){
+function saveDB(){
 
-  x = x || {};
+  localStorage.setItem(
+    DB_KEY,
+    JSON.stringify(db)
+  );
 
-  const out = {
+  renderAll();
 
-    salaryIn:
-      Number(x.salaryIn ?? x.salIn ?? 0),
+}
 
-    salaryOut:
-      Number(x.salaryOut ?? x.salOut ?? 0),
 
-    salaryLogs:
-      Array.isArray(x.salaryLogs)
-        ? x.salaryLogs
-        : Array.isArray(x.salLogs)
-          ? x.salLogs.map(v=>({
-              type:v.type || "out",
-              amount:Number(v.amount ?? v.amt ?? 0),
-              note:v.note || "",
-              date:v.date || nowText()
-            }))
-          : [],
+/* =========================================================
+   DATE / MONEY
+   ========================================================= */
 
-    homeIn:
-      Number(x.homeIn ?? 0),
+function nowText(){
 
-    homeOut:
-      Number(x.homeOut ?? 0),
+  return new Date().toLocaleString(
+    "ta-IN",
+    {
+      dateStyle:"medium",
+      timeStyle:"short"
+    }
+  );
 
-    homeLogs:
-      Array.isArray(x.homeLogs)
-        ? x.homeLogs
-        : [],
+}
 
-    farmLogs:
-      Array.isArray(x.farmLogs)
-        ? x.farmLogs
-        : [],
 
-    expenseLogs:
-      Array.isArray(x.expenseLogs)
-        ? x.expenseLogs
-        : [],
+function todayISO(){
 
-    loans:
-      Array.isArray(x.loans)
-        ? x.loans
-        : [],
+  const d = new Date();
 
-    temps:
-      Array.isArray(x.temps)
-        ? x.temps
-        : [],
+  const y = d.getFullYear();
 
-    perms:
-      Array.isArray(x.perms)
-        ? x.perms
-        : [],
+  const m = String(d.getMonth()+1)
+    .padStart(2,"0");
 
-    reminders:
-      Array.isArray(x.reminders)
-        ? x.reminders
-        : [],
+  const day = String(d.getDate())
+    .padStart(2,"0");
 
-    chat:
-      Array.isArray(x.chat)
-        ? x.chat
-        : [],
+  return `${y}-${m}-${day}`;
 
-    lastAction:
-      x.lastAction || null
+}
 
-  };
 
-  return out;
+function money(n){
+
+  n = Number(n) || 0;
+
+  return "₹" + n.toLocaleString("en-IN");
 
 }
 
@@ -246,8 +160,10 @@ function normalizeDB(x){
 function showPage(id){
 
   document.querySelectorAll(".page")
-    .forEach(p=>{
+    .forEach(p => {
+
       p.classList.remove("active");
+
     });
 
   const page = document.getElementById(id);
@@ -259,117 +175,105 @@ function showPage(id){
   }
 
   document.querySelectorAll("nav button")
-    .forEach(btn=>{
+    .forEach(btn => {
+
       btn.classList.remove("active");
+
     });
 
-}
-
-
-/* =========================================================
-   RENDER EVERYTHING
-   ========================================================= */
-
-function renderAll(){
-
-  renderHome();
-
-  renderSalary();
-
-  renderExpense();
-
-  renderFarm();
-
-  renderHomeAccount();
-
-  renderLoans();
-
-  renderNotes();
-
-  renderReminders();
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
 
 }
 
 
 /* =========================================================
-   HOME SUMMARY
+   BALANCE
    ========================================================= */
 
-function getSalaryBalance(){
+function balance(account){
 
-  return db.salaryIn - db.salaryOut;
-
-}
-
-
-function getHomeBalance(){
-
-  return db.homeIn - db.homeOut;
+  return (
+    Number(db[account].income || 0) -
+    Number(db[account].expense || 0)
+  );
 
 }
 
 
-function getExpenseTotalThisMonth(){
+/* =========================================================
+   ADD ACCOUNT MONEY
+   ========================================================= */
 
-  const d = new Date();
+function addAccountMoney(
+  account,
+  type,
+  amount,
+  note,
+  source = "manual"
+){
 
-  const month = d.getMonth();
+  amount = Number(amount);
 
-  const year = d.getFullYear();
+  if(!amount || amount <= 0){
 
-  return db.expenseLogs
-    .filter(x=>{
+    alert("சரியான தொகையை கொடுக்கவும்");
 
-      const date = new Date(x.isoDate || x.dateRaw || 0);
-
-      return (
-        date.getMonth() === month &&
-        date.getFullYear() === year
-      );
-
-    })
-    .reduce((sum,x)=>sum + Number(x.amount || 0),0);
-
-}
-
-
-function renderHome(){
-
-  const s = document.getElementById("summarySalary");
-
-  const h = document.getElementById("summaryHome");
-
-  const e = document.getElementById("summaryExpense");
-
-  const r = document.getElementById("summaryRem");
-
-  if(s){
-
-    s.textContent =
-      "₹" + money(getSalaryBalance());
+    return false;
 
   }
 
-  if(h){
+  const log = {
 
-    h.textContent =
-      "₹" + money(getHomeBalance());
+    id:Date.now(),
+
+    type,
+
+    amount,
+
+    note:note || "நேரடி பதிவு",
+
+    source,
+
+    date:nowText()
+
+  };
+
+
+  if(type === "in"){
+
+    db[account].income += amount;
+
+  }else{
+
+    db[account].expense += amount;
 
   }
 
-  if(e){
 
-    e.textContent =
-      "₹" + money(getExpenseTotalThisMonth());
+  db[account].logs.unshift(log);
 
-  }
 
-  if(r){
+  db.lastAction = {
 
-    r.textContent =
-      db.reminders.filter(x=>!x.done).length;
+    action:"account",
 
-  }
+    account,
+
+    type,
+
+    amount,
+
+    logId:log.id
+
+  };
+
+
+  saveDB();
+
+  return true;
 
 }
 
@@ -386,154 +290,26 @@ function addSalary(type){
   const note =
     document.getElementById("salaryNote").value.trim();
 
-  if(!amount || amount <= 0){
-
-    alert("தொகையை சரியாக கொடுக்கவும்.");
-
-    return;
-
-  }
-
-  const item = {
-
-    id:Date.now(),
-
+  if(addAccountMoney(
+    "salary",
     type,
-
     amount,
+    note || (type==="in"
+      ? "சம்பள வரவு"
+      : "சம்பள செலவு")
+  )){
 
-    note:note || (type==="in" ? "நேரடி வரவு" : "நேரடி செலவு"),
+    document.getElementById("salaryAmount").value = "";
 
-    date:nowText(),
-
-    isoDate:new Date().toISOString()
-
-  };
-
-  db.salaryLogs.unshift(item);
-
-  if(type==="in"){
-
-    db.salaryIn += amount;
-
-  }else{
-
-    db.salaryOut += amount;
+    document.getElementById("salaryNote").value = "";
 
   }
-
-  db.lastAction = {
-
-    target:"salaryLog",
-
-    id:item.id
-
-  };
-
-  document.getElementById("salaryAmount").value="";
-
-  document.getElementById("salaryNote").value="";
-
-  saveDB();
-
-  renderAll();
-
-}
-
-
-function renderSalary(){
-
-  const balance =
-    document.getElementById("salaryBalance");
-
-  const list =
-    document.getElementById("salaryList");
-
-  if(balance){
-
-    balance.textContent =
-      money(getSalaryBalance());
-
-  }
-
-  if(!list) return;
-
-  if(db.salaryLogs.length===0){
-
-    list.innerHTML =
-      `<div class="empty">சம்பள பதிவுகள் இல்லை.</div>`;
-
-    return;
-
-  }
-
-  list.innerHTML =
-    db.salaryLogs.map(x=>{
-
-      const sign =
-        x.type==="in" ? "+" : "−";
-
-      return `
-
-        <div class="record">
-
-          <div>
-
-            <b>${sign} ₹${money(x.amount)}</b>
-
-            <small>
-              ${escapeHTML(x.note)}
-              • ${escapeHTML(x.date)}
-            </small>
-
-          </div>
-
-          <button
-            class="delete"
-            onclick="deleteSalary(${x.id})">
-            🗑️
-          </button>
-
-        </div>
-
-      `;
-
-    }).join("");
-
-}
-
-
-function deleteSalary(id){
-
-  const index =
-    db.salaryLogs.findIndex(x=>x.id===id);
-
-  if(index<0) return;
-
-  const item =
-    db.salaryLogs[index];
-
-  if(item.type==="in"){
-
-    db.salaryIn -= Number(item.amount);
-
-  }else{
-
-    db.salaryOut -= Number(item.amount);
-
-  }
-
-  db.salaryLogs.splice(index,1);
-
-  saveDB();
-
-  renderAll();
 
 }
 
 
 /* =========================================================
-   HOME ACCOUNT
+   HOME
    ========================================================= */
 
 function addHome(type){
@@ -544,407 +320,20 @@ function addHome(type){
   const note =
     document.getElementById("homeNote").value.trim();
 
-  if(!amount || amount<=0){
-
-    alert("தொகையை சரியாக கொடுக்கவும்.");
-
-    return;
-
-  }
-
-  const item = {
-
-    id:Date.now(),
-
+  if(addAccountMoney(
+    "home",
     type,
-
     amount,
+    note || (type==="in"
+      ? "வீட்டு வரவு"
+      : "வீட்டு செலவு")
+  )){
 
-    note:note || "நேரடி",
+    document.getElementById("homeAmount").value = "";
 
-    date:nowText(),
-
-    isoDate:new Date().toISOString()
-
-  };
-
-  db.homeLogs.unshift(item);
-
-  if(type==="in"){
-
-    db.homeIn += amount;
-
-  }else{
-
-    db.homeOut += amount;
+    document.getElementById("homeNote").value = "";
 
   }
-
-  db.lastAction = {
-
-    target:"homeLog",
-
-    id:item.id
-
-  };
-
-  document.getElementById("homeAmount").value="";
-
-  document.getElementById("homeNote").value="";
-
-  saveDB();
-
-  renderAll();
-
-}
-
-
-function renderHomeAccount(){
-
-  const balance =
-    document.getElementById("homeBalance");
-
-  const list =
-    document.getElementById("homeList");
-
-  if(balance){
-
-    balance.textContent =
-      money(getHomeBalance());
-
-  }
-
-  if(!list) return;
-
-  if(db.homeLogs.length===0){
-
-    list.innerHTML =
-      `<div class="empty">வீட்டு பதிவுகள் இல்லை.</div>`;
-
-    return;
-
-  }
-
-  list.innerHTML =
-    db.homeLogs.map(x=>{
-
-      const sign =
-        x.type==="in" ? "+" : "−";
-
-      return `
-
-        <div class="record">
-
-          <div>
-
-            <b>${sign} ₹${money(x.amount)}</b>
-
-            <small>
-              ${escapeHTML(x.note)}
-              • ${escapeHTML(x.date)}
-            </small>
-
-          </div>
-
-          <button
-            class="delete"
-            onclick="deleteHome(${x.id})">
-            🗑️
-          </button>
-
-        </div>
-
-      `;
-
-    }).join("");
-
-}
-
-
-function deleteHome(id){
-
-  const index =
-    db.homeLogs.findIndex(x=>x.id===id);
-
-  if(index<0) return;
-
-  const item =
-    db.homeLogs[index];
-
-  if(item.type==="in"){
-
-    db.homeIn -= Number(item.amount);
-
-  }else{
-
-    db.homeOut -= Number(item.amount);
-
-  }
-
-  db.homeLogs.splice(index,1);
-
-  saveDB();
-
-  renderAll();
-
-}
-
-
-/* =========================================================
-   EXPENSE
-   ========================================================= */
-
-function addExpenseManual(){
-
-  const note =
-    document.getElementById("expenseNote").value.trim();
-
-  const amount =
-    Number(document.getElementById("expenseAmount").value);
-
-  const person =
-    document.getElementById("expensePerson").value.trim();
-
-  const source =
-    document.getElementById("expenseSource").value;
-
-  if(!amount || amount<=0){
-
-    alert("தொகையை சரியாக கொடுக்கவும்.");
-
-    return;
-
-  }
-
-  addExpense({
-
-    note:note || "பொது செலவு",
-
-    amount,
-
-    person,
-
-    source,
-
-    silent:false
-
-  });
-
-}
-
-
-function addExpense(data){
-
-  const amount =
-    Number(data.amount)||0;
-
-  if(amount<=0) return null;
-
-  const item = {
-
-    id:Date.now()+Math.floor(Math.random()*1000),
-
-    note:data.note || "செலவு",
-
-    amount,
-
-    person:data.person || "",
-
-    source:data.source || "home",
-
-    date:nowText(),
-
-    isoDate:new Date().toISOString()
-
-  };
-
-  db.expenseLogs.unshift(item);
-
-  /*
-    செலவு எந்த account-ல் இருந்து வந்தது
-  */
-
-  if(item.source==="salary"){
-
-    db.salaryOut += amount;
-
-    db.salaryLogs.unshift({
-
-      id:item.id,
-
-      type:"out",
-
-      amount,
-
-      note:item.note,
-
-      date:item.date,
-
-      isoDate:item.isoDate,
-
-      linkedExpense:true
-
-    });
-
-  }
-
-  else if(item.source==="home"){
-
-    db.homeOut += amount;
-
-    db.homeLogs.unshift({
-
-      id:item.id,
-
-      type:"out",
-
-      amount,
-
-      note:item.note,
-
-      date:item.date,
-
-      isoDate:item.isoDate,
-
-      linkedExpense:true
-
-    });
-
-  }
-
-  else if(item.source==="farm"){
-
-    /*
-      Farm account தனி balance இல்லை.
-      Farm expense மட்டும் பதிவு.
-    */
-
-  }
-
-  db.lastAction = {
-
-    target:"expense",
-
-    id:item.id
-
-  };
-
-  saveDB();
-
-  renderAll();
-
-  return item;
-
-}
-
-
-function renderExpense(){
-
-  const list =
-    document.getElementById("expenseList");
-
-  if(!list) return;
-
-  if(db.expenseLogs.length===0){
-
-    list.innerHTML =
-      `<div class="empty">செலவு பதிவுகள் இல்லை.</div>`;
-
-    return;
-
-  }
-
-  list.innerHTML =
-    db.expenseLogs.map(x=>{
-
-      const sourceName =
-        x.source==="salary"
-          ? "சம்பளம்"
-          : x.source==="home"
-            ? "வீடு"
-            : "கொல்லை";
-
-      return `
-
-        <div class="record">
-
-          <div>
-
-            <b>
-              ₹${money(x.amount)} •
-              ${escapeHTML(x.note)}
-            </b>
-
-            <small>
-              ${x.person
-                ? escapeHTML(x.person)+" • "
-                : ""}
-              ${sourceName}
-              • ${escapeHTML(x.date)}
-            </small>
-
-          </div>
-
-          <button
-            class="delete"
-            onclick="deleteExpense(${x.id})">
-            🗑️
-          </button>
-
-        </div>
-
-      `;
-
-    }).join("");
-
-}
-
-
-function deleteExpense(id){
-
-  const index =
-    db.expenseLogs.findIndex(x=>x.id===id);
-
-  if(index<0) return;
-
-  const item =
-    db.expenseLogs[index];
-
-  if(item.source==="salary"){
-
-    db.salaryOut -= Number(item.amount);
-
-    const sIndex =
-      db.salaryLogs.findIndex(x=>x.id===id);
-
-    if(sIndex>=0){
-
-      db.salaryLogs.splice(sIndex,1);
-
-    }
-
-  }
-
-  if(item.source==="home"){
-
-    db.homeOut -= Number(item.amount);
-
-    const hIndex =
-      db.homeLogs.findIndex(x=>x.id===id);
-
-    if(hIndex>=0){
-
-      db.homeLogs.splice(hIndex,1);
-
-    }
-
-  }
-
-  db.expenseLogs.splice(index,1);
-
-  saveDB();
-
-  renderAll();
 
 }
 
@@ -964,212 +353,184 @@ function addFarm(){
   const source =
     document.getElementById("farmSource").value;
 
-  if(!amount || amount<=0){
+  if(!amount || amount <= 0){
 
-    alert("தொகையை சரியாக கொடுக்கவும்.");
+    alert("தொகை கொடுக்கவும்");
 
     return;
 
   }
 
-  const item = {
 
-    id:Date.now(),
-
+  addAccountMoney(
+    "farm",
+    "out",
     amount,
+    note || "கொல்லை செலவு",
+    source
+  );
 
-    note:note || "கொல்லை செலவு",
 
-    source,
+  document.getElementById("farmAmount").value = "";
 
-    date:nowText(),
-
-    isoDate:new Date().toISOString()
-
-  };
-
-  db.farmLogs.unshift(item);
-
-  /*
-    Farm expense என்றாலும் எந்த account-ல்
-    பணம் எடுத்தோம் என்பதை கணக்கில் காட்டுகிறோம்.
-  */
-
-  if(source==="salary"){
-
-    db.salaryOut += amount;
-
-    db.salaryLogs.unshift({
-
-      id:item.id,
-
-      type:"out",
-
-      amount,
-
-      note:item.note,
-
-      date:item.date,
-
-      isoDate:item.isoDate,
-
-      linkedFarm:true
-
-    });
-
-  }
-
-  if(source==="home"){
-
-    db.homeOut += amount;
-
-    db.homeLogs.unshift({
-
-      id:item.id,
-
-      type:"out",
-
-      amount,
-
-      note:item.note,
-
-      date:item.date,
-
-      isoDate:item.isoDate,
-
-      linkedFarm:true
-
-    });
-
-  }
-
-  saveDB();
-
-  renderAll();
-
-  document.getElementById("farmAmount").value="";
-
-  document.getElementById("farmNote").value="";
-
-}
-
-
-function renderFarm(){
-
-  const list =
-    document.getElementById("farmList");
-
-  if(!list) return;
-
-  if(db.farmLogs.length===0){
-
-    list.innerHTML =
-      `<div class="empty">கொல்லை பதிவுகள் இல்லை.</div>`;
-
-    return;
-
-  }
-
-  list.innerHTML =
-    db.farmLogs.map(x=>{
-
-      const sourceName =
-        x.source==="salary"
-          ? "சம்பளம்"
-          : x.source==="home"
-            ? "வீடு"
-            : "கொல்லை";
-
-      return `
-
-        <div class="record">
-
-          <div>
-
-            <b>
-              ₹${money(x.amount)} •
-              ${escapeHTML(x.note)}
-            </b>
-
-            <small>
-              ${sourceName}
-              • ${escapeHTML(x.date)}
-            </small>
-
-          </div>
-
-          <button
-            class="delete"
-            onclick="deleteFarm(${x.id})">
-            🗑️
-          </button>
-
-        </div>
-
-      `;
-
-    }).join("");
-
-}
-
-
-function deleteFarm(id){
-
-  const index =
-    db.farmLogs.findIndex(x=>x.id===id);
-
-  if(index<0) return;
-
-  const item =
-    db.farmLogs[index];
-
-  if(item.source==="salary"){
-
-    db.salaryOut -= Number(item.amount);
-
-    const i =
-      db.salaryLogs.findIndex(x=>x.id===id);
-
-    if(i>=0){
-
-      db.salaryLogs.splice(i,1);
-
-    }
-
-  }
-
-  if(item.source==="home"){
-
-    db.homeOut -= Number(item.amount);
-
-    const i =
-      db.homeLogs.findIndex(x=>x.id===id);
-
-    if(i>=0){
-
-      db.homeLogs.splice(i,1);
-
-    }
-
-  }
-
-  db.farmLogs.splice(index,1);
-
-  saveDB();
-
-  renderAll();
+  document.getElementById("farmNote").value = "";
 
 }
 
 
 /* =========================================================
-   LOAN / INTEREST
+   UNIFIED EXPENSE
+   ========================================================= */
+
+function addExpense(
+  note,
+  amount,
+  person,
+  source
+){
+
+  amount = Number(amount);
+
+  if(!amount || amount <= 0){
+
+    return false;
+
+  }
+
+
+  const expense = {
+
+    id:Date.now(),
+
+    note:note || "செலவு",
+
+    amount,
+
+    person:person || "",
+
+    source:source || "home",
+
+    date:nowText()
+
+  };
+
+
+  db.expenses.unshift(expense);
+
+
+  addAccountMoney(
+    source,
+    "out",
+    amount,
+    note || "செலவு",
+    "expense"
+  );
+
+
+  db.lastAction = {
+
+    action:"expense",
+
+    expenseId:expense.id,
+
+    account:source,
+
+    amount
+
+  };
+
+
+  saveDB();
+
+  return true;
+
+}
+
+
+function addExpenseManual(){
+
+  const note =
+    document.getElementById("expenseNote").value.trim();
+
+  const amount =
+    Number(document.getElementById("expenseAmount").value);
+
+  const person =
+    document.getElementById("expensePerson").value.trim();
+
+  const source =
+    document.getElementById("expenseSource").value;
+
+
+  if(addExpense(
+    note,
+    amount,
+    person,
+    source
+  )){
+
+    document.getElementById("expenseNote").value = "";
+
+    document.getElementById("expenseAmount").value = "";
+
+    document.getElementById("expensePerson").value = "";
+
+  }
+
+}
+
+
+/* =========================================================
+   DELETE EXPENSE
+   ========================================================= */
+
+function deleteExpense(id){
+
+  const index =
+    db.expenses.findIndex(x => x.id === id);
+
+  if(index < 0) return;
+
+
+  const item = db.expenses[index];
+
+  const account = item.source;
+
+
+  db[account].expense -= item.amount;
+
+
+  const logIndex =
+    db[account].logs.findIndex(
+      x =>
+        x.amount === item.amount &&
+        x.note === item.note
+    );
+
+
+  if(logIndex >= 0){
+
+    db[account].logs.splice(logIndex,1);
+
+  }
+
+
+  db.expenses.splice(index,1);
+
+  saveDB();
+
+}
+
+
+/* =========================================================
+   LOANS / INTEREST
    ========================================================= */
 
 function addLoan(){
 
   const name =
-    document.getElementById("loanName").value.trim();
+    document.getElementById("loanName")
+      .value.trim();
 
   const amount =
     Number(document.getElementById("loanAmount").value);
@@ -1178,32 +539,27 @@ function addLoan(){
     Number(document.getElementById("loanRate").value);
 
   const date =
-    document.getElementById("loanDate").value ||
-    todayDate();
+    document.getElementById("loanDate").value
+    || todayISO();
+
 
   if(!name){
 
-    alert("பெயரை கொடுக்கவும்.");
+    alert("பெயர் கொடுக்கவும்");
 
     return;
 
   }
 
-  if(!amount || amount<=0){
 
-    alert("அசல் தொகையை கொடுக்கவும்.");
+  if(!amount || amount <= 0){
 
-    return;
-
-  }
-
-  if(rate<0){
-
-    alert("வட்டி சதவீதம் சரியாக கொடுக்கவும்.");
+    alert("அசல் தொகை கொடுக்கவும்");
 
     return;
 
   }
+
 
   const loan = {
 
@@ -1213,370 +569,95 @@ function addLoan(){
 
     amount,
 
-    rate,
+    rate:Number(rate || 0),
 
-    startDate:date,
+    date,
 
-    payments:[],
+    paid:0,
 
-    created:nowText()
+    payments:[]
 
   };
 
-  db.loans.unshift(loan);
+
+  db.loans.push(loan);
+
+
+  db.lastAction = {
+
+    action:"loan",
+
+    loanId:loan.id
+
+  };
+
 
   saveDB();
 
-  renderAll();
 
-  document.getElementById("loanName").value="";
+  document.getElementById("loanName").value = "";
 
-  document.getElementById("loanAmount").value="";
+  document.getElementById("loanAmount").value = "";
 
-  document.getElementById("loanRate").value="";
+  document.getElementById("loanRate").value = "";
 
 }
 
 
 function loanInterest(loan){
 
-  return Number(loan.amount) *
-         Number(loan.rate) / 100;
-
-}
-
-
-function loanElapsedMonths(loan){
-
-  const start =
-    new Date(loan.startDate || todayDate());
-
-  const now =
-    new Date();
-
-  let months =
-    (now.getFullYear()-start.getFullYear())*12 +
-    (now.getMonth()-start.getMonth());
-
-  if(now.getDate() < start.getDate()){
-
-    months--;
-
-  }
-
-  return Math.max(0,months);
-
-}
-
-
-function loanTotalInterest(loan){
-
-  return loanInterest(loan) *
-         loanElapsedMonths(loan);
-
-}
-
-
-function loanPaidAmount(loan){
-
-  return (loan.payments || [])
-    .reduce((sum,p)=>
-      sum + Number(p.amount||0),0);
-
-}
-
-
-function loanBalance(loan){
-
-  return Math.max(
-    0,
-    Number(loan.amount) -
-    loanPaidAmount(loan)
+  return (
+    Number(loan.amount || 0) *
+    Number(loan.rate || 0) /
+    100
   );
 
 }
 
 
-function loanTotalDue(loan){
+function loanRemaining(loan){
 
-  return loanBalance(loan) +
-         loanTotalInterest(loan);
+  return Math.max(
+    0,
+    Number(loan.amount || 0) -
+    Number(loan.paid || 0)
+  );
 
 }
 
 
-function renderLoans(){
-
-  const list =
-    document.getElementById("loanList");
-
-  if(!list) return;
-
-  if(db.loans.length===0){
-
-    list.innerHTML =
-      `<div class="empty">
-        இன்னும் Loan Account இல்லை.
-      </div>`;
-
-    return;
-
-  }
-
-  /*
-    ஒரே பெயர் இருந்தாலும் ஒவ்வொரு account
-    தனித்தனி account ஆக காட்டப்படும்.
-  */
-
-  list.innerHTML =
-    db.loans.map((loan,index)=>{
-
-      const monthly =
-        loanInterest(loan);
-
-      const months =
-        loanElapsedMonths(loan);
-
-      const interest =
-        loanTotalInterest(loan);
-
-      const paid =
-        loanPaidAmount(loan);
-
-      const balance =
-        loanBalance(loan);
-
-      const total =
-        loanTotalDue(loan);
-
-      return `
-
-        <div class="loan-person">
-
-          <div class="loan-person-header">
-
-            <h3>
-              👤 ${escapeHTML(loan.name)}
-            </h3>
-
-            <div class="loan-person-summary">
-
-              Account #${index+1}
-              •
-              அசல் ₹${money(loan.amount)}
-
-            </div>
-
-          </div>
-
-
-          <div class="loan-account">
-
-            <div class="loan-account-header">
-
-              <b>
-                💰 Loan Account
-              </b>
-
-              <span>
-                ${escapeHTML(loan.startDate)}
-              </span>
-
-            </div>
-
-
-            <div class="loan-account-body">
-
-              <div class="loan-row">
-
-                <span>அசல்</span>
-
-                <b>
-                  ₹${money(loan.amount)}
-                </b>
-
-              </div>
-
-
-              <div class="loan-row">
-
-                <span>மாத வட்டி</span>
-
-                <b>
-                  ${money(loan.rate)}%
-                </b>
-
-              </div>
-
-
-              <div class="loan-row">
-
-                <span>ஒரு மாத வட்டி</span>
-
-                <b>
-                  ₹${money(monthly)}
-                </b>
-
-              </div>
-
-
-              <div class="loan-row">
-
-                <span>கடந்த மாதங்கள்</span>
-
-                <b>
-                  ${months}
-                </b>
-
-              </div>
-
-
-              <div class="loan-row">
-
-                <span>இதுவரை வட்டி</span>
-
-                <b>
-                  ₹${money(interest)}
-                </b>
-
-              </div>
-
-
-              <div class="loan-row">
-
-                <span>திருப்பி கொடுத்தது</span>
-
-                <b>
-                  ₹${money(paid)}
-                </b>
-
-              </div>
-
-
-              <div class="loan-row">
-
-                <span>மீதமுள்ள அசல்</span>
-
-                <b>
-                  ₹${money(balance)}
-                </b>
-
-              </div>
-
-
-              <div class="loan-row">
-
-                <span>மொத்த நிலுவை</span>
-
-                <b>
-                  ₹${money(total)}
-                </b>
-
-              </div>
-
-
-              <div class="loan-actions">
-
-                <button
-                  onclick="addLoanPayment(${loan.id})">
-                  💵 திருப்பி கொடுத்த தொகை
-                </button>
-
-                <button
-                  class="danger"
-                  onclick="deleteLoan(${loan.id})">
-                  🗑️ Account அழி
-                </button>
-
-              </div>
-
-
-              ${
-                (loan.payments || []).length
-                ? `
-
-                  <hr>
-
-                  <b>திருப்பி கொடுத்த பதிவுகள்</b>
-
-                  ${
-                    loan.payments.map(p=>`
-
-                      <div class="loan-row">
-
-                        <span>
-                          ₹${money(p.amount)}
-                          •
-                          ${escapeHTML(p.date)}
-                        </span>
-
-                        <button
-                          class="danger"
-                          onclick="deleteLoanPayment(
-                            ${loan.id},
-                            ${p.id}
-                          )">
-                          🗑️
-                        </button>
-
-                      </div>
-
-                    `).join("")
-                  }
-
-                `
-                : ""
-              }
-
-            </div>
-
-          </div>
-
-        </div>
-
-      `;
-
-    }).join("");
-
-}
-
-
-function addLoanPayment(loanId){
+function addLoanPayment(id){
 
   const loan =
-    db.loans.find(x=>x.id===loanId);
+    db.loans.find(x => x.id === id);
 
   if(!loan) return;
 
-  const value =
-    prompt(
-      `${loan.name} - திருப்பி கொடுத்த தொகை?`
-    );
-
-  if(value===null) return;
 
   const amount =
-    Number(
-      String(value).replace(/,/g,"")
-    );
+    Number(prompt(
+      `${loan.name} கணக்கில் எவ்வளவு திருப்பி கொடுத்தார்?`
+    ));
 
-  if(!amount || amount<=0){
 
-    alert("தொகை சரியாக இல்லை.");
+  if(!amount || amount <= 0){
 
     return;
 
   }
 
-  if(!loan.payments){
 
-    loan.payments=[];
+  loan.paid =
+    Number(loan.paid || 0) + amount;
 
-  }
 
-  loan.payments.push({
+  loan.payments =
+    Array.isArray(loan.payments)
+      ? loan.payments
+      : [];
 
-    id:Date.now(),
+
+  loan.payments.unshift({
 
     amount,
 
@@ -1584,27 +665,8 @@ function addLoanPayment(loanId){
 
   });
 
-  saveDB();
-
-  renderAll();
-
-}
-
-
-function deleteLoanPayment(loanId,paymentId){
-
-  const loan =
-    db.loans.find(x=>x.id===loanId);
-
-  if(!loan) return;
-
-  loan.payments =
-    (loan.payments || [])
-      .filter(p=>p.id!==paymentId);
 
   saveDB();
-
-  renderAll();
 
 }
 
@@ -1617,12 +679,11 @@ function deleteLoan(id){
 
   }
 
+
   db.loans =
-    db.loans.filter(x=>x.id!==id);
+    db.loans.filter(x => x.id !== id);
 
   saveDB();
-
-  renderAll();
 
 }
 
@@ -1634,25 +695,22 @@ function deleteLoan(id){
 function addNote(type){
 
   const id =
-    type==="temp"
+    type === "temp"
       ? "tempText"
       : "permText";
 
-  const input =
-    document.getElementById(id);
-
   const text =
-    input.value.trim();
+    document.getElementById(id).value.trim();
+
 
   if(!text){
-
-    alert("குறிப்பை எழுதவும்.");
 
     return;
 
   }
 
-  const item = {
+
+  db.notes[type].unshift({
 
     id:Date.now(),
 
@@ -1660,133 +718,38 @@ function addNote(type){
 
     date:nowText()
 
+  });
+
+
+  db.lastAction = {
+
+    action:"note",
+
+    type,
+
+    id:db.notes[type][0].id
+
   };
 
-  if(type==="temp"){
 
-    db.temps.unshift(item);
-
-  }else{
-
-    db.perms.unshift(item);
-
-  }
-
-  input.value="";
+  document.getElementById(id).value = "";
 
   saveDB();
-
-  renderNotes();
-
-}
-
-
-function renderNotes(){
-
-  const temp =
-    document.getElementById("tempList");
-
-  const perm =
-    document.getElementById("permList");
-
-  if(temp){
-
-    temp.innerHTML =
-      db.temps.length
-      ? db.temps.map(x=>`
-
-          <div class="record">
-
-            <div>
-
-              <b>
-                ${escapeHTML(x.text)}
-              </b>
-
-              <small>
-                ${escapeHTML(x.date)}
-              </small>
-
-            </div>
-
-            <button
-              class="delete"
-              onclick="deleteNote('temp',${x.id})">
-              🗑️
-            </button>
-
-          </div>
-
-        `).join("")
-      : `<div class="empty">
-          தற்காலிக குறிப்புகள் இல்லை.
-        </div>`;
-
-  }
-
-
-  if(perm){
-
-    perm.innerHTML =
-      db.perms.length
-      ? db.perms.map(x=>`
-
-          <div class="record">
-
-            <div>
-
-              <b>
-                ${escapeHTML(x.text)}
-              </b>
-
-              <small>
-                ${escapeHTML(x.date)}
-              </small>
-
-            </div>
-
-            <button
-              class="delete"
-              onclick="deleteNote('perm',${x.id})">
-              🗑️
-            </button>
-
-          </div>
-
-        `).join("")
-      : `<div class="empty">
-          நிரந்தர குறிப்புகள் இல்லை.
-        </div>`;
-
-  }
 
 }
 
 
 function deleteNote(type,id){
 
-  if(type==="temp"){
-
-    db.temps =
-      db.temps.filter(x=>x.id!==id);
-
-  }else{
-
-    db.perms =
-      db.perms.filter(x=>x.id!==id);
-
-  }
+  db.notes[type] =
+    db.notes[type].filter(x => x.id !== id);
 
   saveDB();
-
-  renderNotes();
 
 }
 
 
 function clearTemporary(){
-
-  if(!db.temps.length) return;
 
   if(!confirm(
     "அனைத்து தற்காலிக குறிப்புகளையும் அழிக்கவா?"
@@ -1796,11 +759,10 @@ function clearTemporary(){
 
   }
 
-  db.temps=[];
+
+  db.notes.temp = [];
 
   saveDB();
-
-  renderNotes();
 
 }
 
@@ -1812,7 +774,8 @@ function clearTemporary(){
 function addReminder(){
 
   const text =
-    document.getElementById("reminderText").value.trim();
+    document.getElementById("reminderText")
+      .value.trim();
 
   const date =
     document.getElementById("reminderDate").value;
@@ -1825,23 +788,17 @@ function addReminder(){
       document.getElementById("reminderEarly").value
     ) || 0;
 
-  if(!text){
 
-    alert("எதை நினைவூட்ட வேண்டும் என்பதை எழுதவும்.");
+  if(!text || !date || !time){
 
-    return;
-
-  }
-
-  if(!date || !time){
-
-    alert("தேதி மற்றும் நேரம் கொடுக்கவும்.");
+    alert("நினைவூட்டல், தேதி, நேரம் கொடுக்கவும்");
 
     return;
 
   }
 
-  const item = {
+
+  const reminder = {
 
     id:Date.now(),
 
@@ -1855,141 +812,29 @@ function addReminder(){
 
     done:false,
 
-    notified:false
+    notified:false,
+
+    created:nowText()
 
   };
 
-  db.reminders.unshift(item);
+
+  db.reminders.push(reminder);
+
+
+  db.lastAction = {
+
+    action:"reminder",
+
+    id:reminder.id
+
+  };
+
 
   saveDB();
 
-  renderAll();
 
-  document.getElementById("reminderText").value="";
-
-}
-
-
-function reminderDateTime(r){
-
-  return new Date(
-    `${r.date}T${r.time}:00`
-  );
-
-}
-
-
-function renderReminders(){
-
-  const list =
-    document.getElementById("reminderList");
-
-  if(!list) return;
-
-  if(db.reminders.length===0){
-
-    list.innerHTML =
-      `<div class="empty">
-        நினைவூட்டல்கள் இல்லை.
-      </div>`;
-
-    return;
-
-  }
-
-  const now =
-    new Date();
-
-  list.innerHTML =
-    db.reminders.map(r=>{
-
-      const target =
-        reminderDateTime(r);
-
-      const notifyAt =
-        new Date(
-          target.getTime() -
-          Number(r.early||0)*60000
-        );
-
-      const due =
-        now >= notifyAt &&
-        !r.done;
-
-      return `
-
-        <div class="record ${
-          due
-            ? "reminder-due"
-            : "reminder-ok"
-        }">
-
-          <div>
-
-            <b>
-              ⏰ ${escapeHTML(r.text)}
-            </b>
-
-            <small>
-
-              ${escapeHTML(r.date)}
-              •
-              ${escapeHTML(r.time)}
-              •
-              ${r.early} நிமிடம் முன்
-
-            </small>
-
-          </div>
-
-
-          <div>
-
-            ${
-              !r.done
-              ? `
-                <button
-                  class="green"
-                  onclick="completeReminder(${r.id})">
-                  ✓
-                </button>
-              `
-              : `
-                <button class="gray">
-                  முடிந்தது
-                </button>
-              `
-            }
-
-            <button
-              class="delete"
-              onclick="deleteReminder(${r.id})">
-              🗑️
-            </button>
-
-          </div>
-
-        </div>
-
-      `;
-
-    }).join("");
-
-}
-
-
-function completeReminder(id){
-
-  const r =
-    db.reminders.find(x=>x.id===id);
-
-  if(!r) return;
-
-  r.done=true;
-
-  saveDB();
-
-  renderAll();
+  document.getElementById("reminderText").value = "";
 
 }
 
@@ -1997,11 +842,9 @@ function completeReminder(id){
 function deleteReminder(id){
 
   db.reminders =
-    db.reminders.filter(x=>x.id!==id);
+    db.reminders.filter(x => x.id !== id);
 
   saveDB();
-
-  renderAll();
 
 }
 
@@ -2014,33 +857,20 @@ async function requestNotifications(){
 
   if(!("Notification" in window)){
 
-    alert(
-      "இந்த browser Notification-ஐ support செய்யவில்லை."
-    );
+    alert("இந்த browser Notification-ஐ support செய்யவில்லை");
 
     return;
 
   }
 
-  try{
 
-    const permission =
-      await Notification.requestPermission();
+  const permission =
+    await Notification.requestPermission();
 
-    if(permission==="granted"){
 
-      new Notification(
-        "🎙️ ஜாக்கி",
-        {
-          body:"Notification வேலை செய்கிறது!"
-        }
-      );
+  if(permission === "granted"){
 
-    }
-
-  }catch(e){
-
-    console.error(e);
+    alert("🔔 Notification அனுமதி கிடைத்துவிட்டது");
 
   }
 
@@ -2049,59 +879,94 @@ async function requestNotifications(){
 
 function checkReminders(){
 
-  const now =
-    new Date();
+  const now = new Date();
 
-  let changed=false;
+  let changed = false;
 
-  db.reminders.forEach(r=>{
 
-    if(r.done || r.notified) return;
+  db.reminders.forEach(rem => {
+
+    if(rem.done || rem.notified){
+
+      return;
+
+    }
+
 
     const target =
-      reminderDateTime(r);
-
-    const notifyAt =
       new Date(
-        target.getTime() -
-        Number(r.early||0)*60000
+        `${rem.date}T${rem.time}:00`
       );
 
-    if(now>=notifyAt){
 
-      r.notified=true;
+    const earlyMs =
+      Number(rem.early || 0) *
+      60 *
+      1000;
 
-      changed=true;
 
-      if(
-        "Notification" in window &&
-        Notification.permission==="granted"
-      ){
+    const notifyTime =
+      new Date(
+        target.getTime() -
+        earlyMs
+      );
 
-        try{
 
-          new Notification(
-            "⏰ ஜாக்கி நினைவூட்டல்",
-            {
-              body:r.text
-            }
-          );
+    if(
+      now >= notifyTime &&
+      now <= target.getTime() + 60000
+    ){
 
-        }catch(e){}
+      sendReminderNotification(rem);
 
-      }
+      rem.notified = true;
+
+      changed = true;
 
     }
 
   });
 
+
   if(changed){
 
     saveDB();
 
-    renderReminders();
+  }
+
+}
+
+
+function sendReminderNotification(rem){
+
+  const text =
+    `⏰ நினைவூட்டல்\n${rem.text}`;
+
+
+  if(
+    "Notification" in window &&
+    Notification.permission === "granted"
+  ){
+
+    try{
+
+      new Notification(
+        "🎙️ ஜாக்கி",
+        {
+          body:rem.text
+        }
+      );
+
+    }catch(e){
+
+      console.log(e);
+
+    }
 
   }
+
+
+  speakText(text);
 
 }
 
@@ -2114,76 +979,74 @@ function parseAmount(text){
 
   if(!text) return 0;
 
-  let s =
-    String(text)
-      .toLowerCase()
+
+  let clean =
+    text
       .replace(/,/g,"")
-      .replace(/₹/g," ")
-      .replace(/ரூபாய்/g," ")
-      .replace(/ரூபா/g," ")
-      .replace(/ரூ/g," ");
+      .replace(/₹/g,"");
 
-  /*
-    Direct numeric amount
-  */
 
-  const nums =
-    s.match(/\d+(?:\.\d+)?/g);
+  const numberMatches =
+    clean.match(
+      /\d+(?:\.\d+)?/g
+    );
 
-  let numeric=0;
 
-  if(nums && nums.length){
+  let numberAmount = 0;
 
-    /*
-      பொதுவாக முதல் பெரிய numeric amount.
-    */
 
-    numeric =
-      Number(nums[0]);
+  if(numberMatches){
+
+    numberAmount =
+      Number(
+        numberMatches[
+          numberMatches.length - 1
+        ]
+      ) || 0;
 
   }
 
-  /*
-    Tamil amount words
-  */
 
-  const words = {
+  const t =
+    clean.toLowerCase();
 
-    "பத்தாயிரம்":10000,
-    "பதினாயிரம்":10000,
 
-    "இருபதாயிரம்":20000,
+  let wordAmount = 0;
 
-    "முப்பதாயிரம்":30000,
 
-    "நாற்பதாயிரம்":40000,
+  const special = [
 
-    "ஐம்பதாயிரம்":50000,
+    ["ஐம்பதாயிரம்",50000],
+    ["நாற்பதாயிரம்",40000],
+    ["முப்பதாயிரம்",30000],
+    ["இருபதாயிரம்",20000],
+    ["பத்தாயிரம்",10000],
 
-    "அறுபதாயிரம்":60000,
+    ["ஐம்பதாயிர",50000],
+    ["நாற்பதாயிர",40000],
+    ["முப்பதாயிர",30000],
+    ["இருபதாயிர",20000],
+    ["பத்தாயிர",10000],
 
-    "எழுபதாயிரம்":70000,
+    ["ஐம்பது ஆயிரம்",50000],
+    ["நாற்பது ஆயிரம்",40000],
+    ["முப்பது ஆயிரம்",30000],
+    ["இருபது ஆயிரம்",20000],
+    ["பத்து ஆயிரம்",10000],
 
-    "எண்பதாயிரம்":80000,
+    ["ஒரு லட்சம்",100000],
+    ["ஒரு லட்ச",100000],
+    ["இரண்டு லட்சம்",200000],
+    ["மூன்று லட்சம்",300000]
 
-    "தொண்ணூறாயிரம்":90000,
+  ];
 
-    "ஒரு லட்சம்":100000,
-    "ஒருலட்சம்":100000,
 
-    "இரண்டு லட்சம்":200000,
-    "மூன்று லட்சம்":300000
+  for(const [word,val] of special){
 
-  };
+    if(t.includes(word)){
 
-  let wordAmount=0;
-
-  for(const key in words){
-
-    if(s.includes(key)){
-
-      wordAmount =
-        words[key];
+      wordAmount = val;
 
       break;
 
@@ -2191,39 +1054,98 @@ function parseAmount(text){
 
   }
 
-  /*
-    "20 ஆயிரம்"
-    "5 ஆயிரம்"
-    "2 லட்சம்"
-  */
 
-  const thousand =
-    s.match(
-      /(\d+(?:\.\d+)?)\s*ஆயிரம்/
-    );
+  if(
+    t.includes("ஆயிரம்") ||
+    t.includes("ஆயிர")
+  ){
 
-  if(thousand){
+    if(!wordAmount){
 
-    wordAmount =
-      Number(thousand[1])*1000;
+      const m =
+        t.match(
+          /(\d+(?:\.\d+)?)\s*ஆயிர/
+        );
+
+      if(m){
+
+        wordAmount =
+          Number(m[1]) * 1000;
+
+      }else{
+
+        const tamilThousands = {
+
+          "ஒரு":1,
+          "ஒன்று":1,
+          "இரண்டு":2,
+          "ரெண்டு":2,
+          "மூன்று":3,
+          "மூணு":3,
+          "நான்கு":4,
+          "நாலு":4,
+          "ஐந்து":5,
+          "அஞ்சு":5,
+          "ஆறு":6,
+          "ஏழு":7,
+          "எட்டு":8,
+          "ஒன்பது":9,
+          "பத்து":10
+
+        };
+
+
+        for(const k in tamilThousands){
+
+          if(t.includes(k + " ஆயிர")){
+
+            wordAmount =
+              tamilThousands[k] * 1000;
+
+            break;
+
+          }
+
+        }
+
+      }
+
+    }
 
   }
 
-  const lakh =
-    s.match(
-      /(\d+(?:\.\d+)?)\s*லட்சம்/
-    );
 
-  if(lakh){
+  if(
+    t.includes("லட்சம்") ||
+    t.includes("லட்ச")
+  ){
 
-    wordAmount =
-      Number(lakh[1])*100000;
+    if(!wordAmount){
+
+      const m =
+        t.match(
+          /(\d+(?:\.\d+)?)\s*லட்ச/
+        );
+
+      if(m){
+
+        wordAmount =
+          Number(m[1]) * 100000;
+
+      }else{
+
+        wordAmount = 100000;
+
+      }
+
+    }
 
   }
+
 
   return Math.max(
-    numeric || 0,
-    wordAmount || 0
+    numberAmount,
+    wordAmount
   );
 
 }
@@ -2235,157 +1157,126 @@ function parseAmount(text){
 
 function parseRate(text){
 
-  if(!text) return 0;
-
-  const s =
-    text.toLowerCase();
-
-  const numeric =
-    s.match(
-      /(\d+(?:\.\d+)?)\s*(?:%|சதவீதம்|வட்டி)/
+  const m =
+    text.match(
+      /(\d+(?:\.\d+)?)\s*%/
     );
 
-  if(numeric){
 
-    return Number(numeric[1]);
+  if(m){
+
+    return Number(m[1]);
 
   }
 
+
   if(
-    s.includes("மூன்று") ||
-    s.includes("மூணு")
+    text.includes("3%") ||
+    text.includes("மூன்று சதவீதம்") ||
+    text.includes("மூணு சதவீதம்")
   ){
 
     return 3;
 
   }
 
+
   if(
-    s.includes("இரண்டு") ||
-    s.includes("ரெண்டு") ||
-    s.includes("2")
+    text.includes("2%") ||
+    text.includes("இரண்டு சதவீதம்") ||
+    text.includes("ரெண்டு சதவீதம்")
   ){
 
     return 2;
 
   }
 
+
   if(
-    s.includes("ஒன்று") ||
-    s.includes("ஒரு சதவீத")
+    text.includes("1%") ||
+    text.includes("ஒரு சதவீதம்")
   ){
 
     return 1;
 
   }
 
-  return 0;
+
+  return 2;
 
 }
 
 
 /* =========================================================
-   PERSON PARSER
+   SOURCE DETECTION
    ========================================================= */
 
-function parsePerson(text){
+function detectSource(text){
 
-  /*
-    "MMக்கு"
-    "MM க்கு"
-    "ராஜாவுக்கு"
-    போன்றவற்றை பிடிக்கும்.
-  */
-
-  let m =
-    text.match(
-      /([A-Za-z\u0B80-\u0BFF]{2,})\s*(?:க்கு|கிட்ட|விடம்|இடம்|க்கு)/i
-    );
-
-  if(m){
-
-    return m[1];
-
-  }
-
-  /*
-    "ராஜா 50000 2% வட்டி"
-  */
-
-  const words =
-    text.trim().split(/\s+/);
-
-  if(words.length){
-
-    const first =
-      words[0]
-        .replace(/[^\u0B80-\u0BFFA-Za-z]/g,"");
-
-    if(
-      first &&
-      !/^\d+$/.test(first) &&
-      ![
-        "வட்டி",
-        "கணக்கு",
-        "சம்பளம்",
-        "வரவு",
-        "செலவு"
-      ].includes(first)
-    ){
-
-      return first;
-
-    }
-
-  }
-
-  return "";
-
-}
+  const t = text.toLowerCase();
 
 
-/* =========================================================
-   SOURCE PARSER
-   ========================================================= */
-
-function parseSource(text){
-
-  const s =
-    text.toLowerCase();
+  /* SALARY */
 
   if(
-    s.includes("சம்பளத்தில்") ||
-    s.includes("சம்பள பணம்") ||
-    s.includes("சம்பளத்திலிருந்து") ||
-    s.includes("salary")
+    t.includes("சம்பளத்தில்") ||
+    t.includes("சம்பளத்தில") ||
+    t.includes("சம்பள பணத்தில்") ||
+    t.includes("சம்பள பணத்தில") ||
+    t.includes("சம்பள பணம்") ||
+    t.includes("சம்பளத்துல") ||
+    t.includes("சம்பள பணத்துல") ||
+    t.includes("சம்பளத்திலிருந்து") ||
+    t.includes("சம்பளத்தில் இருந்து") ||
+    t.includes("salary")
   ){
 
     return "salary";
 
   }
 
+
+  /* HOME */
+
   if(
-    s.includes("வீட்டு") ||
-    s.includes("வீடு") ||
-    s.includes("வீட்டு பணம்")
+    t.includes("வீட்டு பணத்தில்") ||
+    t.includes("வீட்டு பணத்தில") ||
+    t.includes("வீட்டு பணத்துல") ||
+    t.includes("வீட்டுப் பணத்தில்") ||
+    t.includes("வீட்டுப் பணத்துல") ||
+    t.includes("வீட்டில் இருந்து") ||
+    t.includes("வீட்டிலிருந்து") ||
+    t.includes("வீட்டு பணம்") ||
+    t.includes("வீட்டுப் பணம்") ||
+    t.includes("வீட்டுல") ||
+    t.includes("வீட்டு")
   ){
 
     return "home";
 
   }
 
+
+  /* FARM */
+
   if(
-    s.includes("கொல்லை") ||
-    s.includes("farm")
+    t.includes("கொல்லை பணத்தில்") ||
+    t.includes("கொல்லை பணத்தில") ||
+    t.includes("கொல்லை பணத்துல") ||
+    t.includes("கொல்லை பணம்") ||
+    t.includes("கொல்லைல") ||
+    t.includes("farm")
   ){
 
     return "farm";
 
   }
 
+
   /*
-    Default:
-    screenshot logic போல வீட்டு பணம்.
+     If expense is mentioned without source,
+     default to HOME because daily household
+     expenses are normally from home money.
   */
 
   return "home";
@@ -2394,212 +1285,715 @@ function parseSource(text){
 
 
 /* =========================================================
-   EXPENSE KEYWORDS
+   INCOME SOURCE DETECTION
    ========================================================= */
 
-function isExpenseMessage(text){
+function detectIncomeAccount(text){
 
-  const s =
-    text.toLowerCase();
+  const t = text.toLowerCase();
 
-  const keys = [
 
-    "செலவு",
-    "பெட்ரோல்",
-    "டீ",
-    "காபி",
-    "சாப்பாடு",
-    "டிபன்",
-    "காய்கறி",
-    "மருந்து",
-    "உரம்",
-    "வாங்கிய",
-    "வாங்குனேன்",
-    "வாங்கினேன்",
-    "போட்டேன்",
-    "குடித்தேன்",
-    "பில்",
-    "மருத்துவம்"
+  if(
+    t.includes("சம்பளம்") ||
+    t.includes("சம்பள பணம்") ||
+    t.includes("சம்பளம் வந்த") ||
+    t.includes("சம்பளம் வாங்க") ||
+    t.includes("சம்பளம் வாங்கிய") ||
+    t.includes("salary")
+  ){
 
-  ];
+    return "salary";
 
-  return keys.some(k=>s.includes(k));
+  }
+
+
+  if(
+    t.includes("வீட்டு பணம்") ||
+    t.includes("வீட்டில் பணம்") ||
+    t.includes("வீட்டுக்கு பணம்") ||
+    t.includes("வீட்டு வரவு") ||
+    t.includes("வீட்டில் வரவு") ||
+    t.includes("home")
+  ){
+
+    return "home";
+
+  }
+
+
+  if(
+    t.includes("கொல்லை பணம்") ||
+    t.includes("கொல்லை வரவு") ||
+    t.includes("farm")
+  ){
+
+    return "farm";
+
+  }
+
+
+  return null;
 
 }
 
 
 /* =========================================================
-   LOAN MESSAGE DETECTION
+   NATURAL LANGUAGE CLASSIFICATION
    ========================================================= */
 
-function isLoanMessage(text){
+function isIncomeMessage(text){
 
-  const s =
+  const t =
     text.toLowerCase();
 
-  return (
-    s.includes("வட்டி") &&
-    (
-      s.includes("கொடுத்தேன்") ||
-      s.includes("கொடுத்திருக்க") ||
-      s.includes("கொடுத்திருக்கோம்") ||
-      s.includes("கடன்") ||
-      s.includes("loan") ||
-      parseRate(s)>0
-    )
+
+  const words = [
+
+    "வரவு",
+    "வந்தது",
+    "வந்தாச்சு",
+    "வந்தாச்ச",
+    "வந்துடுச்சு",
+    "கிடைத்தது",
+    "கிடைச்சது",
+    "கொடுத்தார்கள்",
+    "கொடுத்தாங்க",
+    "கொடுத்தார்",
+    "கொடுத்தாச்சு",
+    "வாங்கியாச்சு",
+    "வாங்கிட்டேன்",
+    "வாங்கினேன்",
+    "சம்பளம் வந்தது",
+    "சம்பளம் வாங்கியாச்சு",
+    "பணம் வந்தது",
+    "பணம் கிடைத்தது",
+    "பெற்றேன்"
+
+  ];
+
+
+  return words.some(
+    w => t.includes(w)
+  );
+
+}
+
+
+function isExpenseMessage(text){
+
+  const t =
+    text.toLowerCase();
+
+
+  const words = [
+
+    "செலவு",
+    "செலவானது",
+    "செலவு செய்தேன்",
+    "செலவு பண்ணினேன்",
+    "செலவு பண்ணேன்",
+    "வாங்கினேன்",
+    "வாங்கிட்டேன்",
+    "போட்டேன்",
+    "கொடுத்தேன்",
+    "கொடுத்தாச்சு",
+    "குடித்தேன்",
+    "சாப்பிட்டேன்",
+    "பெட்ரோல்",
+    "டீ",
+    "தேநீர்",
+    "காபி",
+    "சாப்பாடு",
+    "சாப்பிட்ட",
+    "டிபன்",
+    "காய்கறி",
+    "மருந்து",
+    "உரம்",
+    "விதை",
+    "டீசல்",
+    "பஸ்",
+    "ஆட்டோ",
+    "பால்",
+    "மளிகை",
+    "காய்கறி",
+    "பில்",
+    "மின்சாரம்",
+    "தண்ணீர்"
+
+  ];
+
+
+  return words.some(
+    w => t.includes(w)
   );
 
 }
 
 
 /* =========================================================
-   AI RESPONSE
+   PERSON EXTRACTION
    ========================================================= */
 
-function sendMessage(){
+function extractPerson(text){
 
-  const input =
-    document.getElementById("textInput");
+  /*
+     Common pattern:
+     MMக்கு
+     ராஜாவுக்கு
+     MM க்கு
+     ராஜா கணக்கில்
+  */
 
-  const text =
-    input.value.trim();
+  let m =
+    text.match(
+      /([A-Za-z\u0B80-\u0BFF]{2,})\s*(?:க்கு|கிட்ட|கணக்கில்|கணக்குல)/
+    );
 
-  if(!text) return;
 
-  addChat("user",text);
+  if(m){
 
-  input.value="";
+    return m[1];
 
-  const response =
-    processAI(text);
+  }
 
-  setTimeout(()=>{
 
-    addChat("ai",response);
+  m =
+    text.match(
+      /(?:க்கு|கிட்ட)\s*([A-Za-z\u0B80-\u0BFF]{2,})/
+    );
 
-  },150);
+
+  if(m){
+
+    return m[1];
+
+  }
+
+
+  return "";
 
 }
 
 
-function addChat(type,text){
+/* =========================================================
+   EXPENSE NOTE EXTRACTION
+   ========================================================= */
+
+function detectExpenseNote(text){
+
+  const t =
+    text.toLowerCase();
+
+
+  const items = [
+
+    "பெட்ரோல்",
+    "டீசல்",
+    "டீ",
+    "காபி",
+    "தேநீர்",
+    "சாப்பாடு",
+    "டிபன்",
+    "காய்கறி",
+    "மருந்து",
+    "உரம்",
+    "விதை",
+    "பால்",
+    "மளிகை",
+    "மின்சாரம்",
+    "தண்ணீர்",
+    "பில்",
+    "பஸ்",
+    "ஆட்டோ"
+
+  ];
+
+
+  for(const item of items){
+
+    if(t.includes(item)){
+
+      return item;
+
+    }
+
+  }
+
+
+  return "செலவு";
+
+}
+
+
+/* =========================================================
+   INCOME HANDLER
+   ========================================================= */
+
+function handleIncome(text){
+
+  const account =
+    detectIncomeAccount(text);
+
+
+  const amount =
+    parseAmount(text);
+
+
+  if(!account){
+
+    return false;
+
+  }
+
+
+  if(!amount){
+
+    speakText(
+      "எவ்வளவு பணம் வந்தது என்று சொல்லுங்கள்."
+    );
+
+    return true;
+
+  }
+
+
+  let note = "வரவு";
+
+
+  if(account === "salary"){
+
+    note = "சம்பள வரவு";
+
+  }
+
+  if(account === "home"){
+
+    note = "வீட்டு வரவு";
+
+  }
+
+  if(account === "farm"){
+
+    note = "கொல்லை வரவு";
+
+  }
+
+
+  addAccountMoney(
+    account,
+    "in",
+    amount,
+    note,
+    "voice"
+  );
+
+
+  const names = {
+
+    salary:"சம்பள கணக்கில்",
+
+    home:"வீட்டு கணக்கில்",
+
+    farm:"கொல்லை கணக்கில்"
+
+  };
+
+
+  const reply =
+    `${names[account]} ${money(amount)} வரவு சேர்த்துவிட்டேன்.`;
+
+
+  addAIMessage(reply);
+
+  speakText(reply);
+
+  return true;
+
+}
+
+
+/* =========================================================
+   EXPENSE HANDLER
+   ========================================================= */
+
+function handleExpense(text){
+
+  const amount =
+    parseAmount(text);
+
+
+  if(!amount){
+
+    speakText(
+      "செலவு தொகையை சொல்லுங்கள்."
+    );
+
+    return true;
+
+  }
+
+
+  const source =
+    detectSource(text);
+
+
+  const note =
+    detectExpenseNote(text);
+
+
+  const person =
+    extractPerson(text);
+
+
+  addExpense(
+    note,
+    amount,
+    person,
+    source
+  );
+
+
+  const sourceName = {
+
+    salary:"சம்பள பணத்தில் இருந்து",
+
+    home:"வீட்டு பணத்தில் இருந்து",
+
+    farm:"கொல்லை பணத்தில் இருந்து"
+
+  };
+
+
+  let reply =
+    `${sourceName[source]} ${money(amount)} ${note} செலவு சேர்த்துவிட்டேன்.`;
+
+
+  if(person){
+
+    reply += ` (${person})`;
+
+  }
+
+
+  addAIMessage(reply);
+
+  speakText(reply);
+
+  return true;
+
+}
+
+
+/* =========================================================
+   CHAT
+   ========================================================= */
+
+function addUserMessage(text){
 
   const box =
     document.getElementById("chatBox");
 
   if(!box) return;
 
+
   const div =
     document.createElement("div");
 
   div.className =
-    `message ${type}`;
+    "message user";
 
-  div.textContent=text;
+  div.textContent =
+    text;
+
 
   box.appendChild(div);
 
   box.scrollTop =
     box.scrollHeight;
 
-  db.chat.push({
+}
 
-    type,
 
-    text,
+function addAIMessage(text){
 
-    date:nowText()
+  const box =
+    document.getElementById("chatBox");
 
-  });
+  if(!box) return;
 
-  /*
-    chat அதிகமாக வளராமல் வைத்துக்கொள்வோம்
-  */
 
-  if(db.chat.length>200){
+  const div =
+    document.createElement("div");
 
-    db.chat =
-      db.chat.slice(-200);
+  div.className =
+    "message ai";
 
-  }
+  div.textContent =
+    text;
 
-  saveDB();
+
+  box.appendChild(div);
+
+  box.scrollTop =
+    box.scrollHeight;
+
+}
+
+
+function clearChat(){
+
+  const box =
+    document.getElementById("chatBox");
+
+  if(!box) return;
+
+
+  box.innerHTML = `
+
+    <div class="message ai">
+      வணக்கம்! என்ன செய்ய வேண்டும்?
+    </div>
+
+  `;
 
 }
 
 
 /* =========================================================
-   AI CORE
+   QUERY HANDLER
    ========================================================= */
 
-function processAI(text){
+function handleQuery(text){
 
-  const s =
-    text.toLowerCase().trim();
+  const t =
+    text.toLowerCase();
 
 
-  /* -----------------------------------------
-     UNDO
-  ----------------------------------------- */
+  /* SALARY BALANCE */
 
   if(
-    s.includes("தப்பா") ||
-    s.includes("தப்பு") ||
-    s.includes("நீக்கு") ||
-    s.includes("அழி") ||
-    s.includes("undo")
-  ){
-
-    return undoLast();
-
-  }
-
-
-  /* -----------------------------------------
-     LOAN QUERY
-  ----------------------------------------- */
-
-  if(
+    t.includes("சம்பள வரவு") &&
     (
-      s.includes("யாருக்கெல்லாம்") ||
-      s.includes("யாருக்கு") ||
-      s.includes("loan list") ||
-      s.includes("வட்டி கணக்கு")
-    ) &&
-    (
-      s.includes("வட்டி") ||
-      s.includes("கடன்") ||
-      s.includes("பணம்")
+      t.includes("எவ்வளவு") ||
+      t.includes("எவ்வளவு இருக்கு") ||
+      t.includes("மொத்தம்")
     )
   ){
 
-    return loanSummary();
+    const reply =
+      `சம்பள வரவு மொத்தம் ${money(
+        db.salary.income
+      )}.`;
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return true;
 
   }
 
 
-  /* -----------------------------------------
-     PARTICULAR PERSON LOAN QUERY
-  ----------------------------------------- */
+  if(
+    (
+      t.includes("சம்பள மீதி") ||
+      t.includes("சம்பள கணக்கில்") ||
+      t.includes("சம்பள பணம் எவ்வளவு")
+    ) &&
+    t.includes("எவ்வளவு")
+  ){
+
+    const reply =
+      `சம்பள பணம் மீதி ${money(
+        balance("salary")
+      )}.`;
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return true;
+
+  }
+
+
+  /* HOME BALANCE */
 
   if(
-    s.includes("கணக்கில்") ||
-    s.includes("கணக்கு எவ்வளவு") ||
-    s.includes("மீதம் எவ்வளவு") ||
-    s.includes("இன்னும் எவ்வளவு")
+    (
+      t.includes("வீட்டு பணம்") ||
+      t.includes("வீட்டு கணக்கு") ||
+      t.includes("வீட்டு மீதி")
+    ) &&
+    t.includes("எவ்வளவு")
+  ){
+
+    const reply =
+      `வீட்டு பணம் மீதி ${money(
+        balance("home")
+      )}.`;
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return true;
+
+  }
+
+
+  /* FARM BALANCE */
+
+  if(
+    (
+      t.includes("கொல்லை பணம்") ||
+      t.includes("கொல்லை கணக்கு") ||
+      t.includes("கொல்லை மீதி")
+    ) &&
+    t.includes("எவ்வளவு")
+  ){
+
+    const reply =
+      `கொல்லை பணம் மீதி ${money(
+        balance("farm")
+      )}.`;
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return true;
+
+  }
+
+
+  /* TOTAL EXPENSE */
+
+  if(
+    t.includes("மொத்த செலவு") ||
+    t.includes("மொத்த செலவுகள்") ||
+    t.includes("இந்த மாத செலவு")
+  ){
+
+    const total =
+      db.expenses.reduce(
+        (sum,x) =>
+          sum + Number(x.amount || 0),
+        0
+      );
+
+
+    const reply =
+      `மொத்த செலவு ${money(total)}.`;
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return true;
+
+  }
+
+
+  /* WHO LOANS */
+
+  if(
+    t.includes("யாருக்கெல்லாம்") &&
+    (
+      t.includes("வட்டி") ||
+      t.includes("கடன்")
+    )
+  ){
+
+    if(!db.loans.length){
+
+      const reply =
+        "இப்போது யாருடைய வட்டி கணக்கும் இல்லை.";
+
+      addAIMessage(reply);
+
+      speakText(reply);
+
+      return true;
+
+    }
+
+
+    const names =
+      db.loans.map(
+        x =>
+          `${x.name} - ${money(x.amount)} - ${x.rate}%`
+      ).join("\n");
+
+
+    const reply =
+      `வட்டி கணக்குகள்:\n${names}`;
+
+    addAIMessage(reply);
+
+    speakText(
+      `மொத்தம் ${db.loans.length} வட்டி கணக்குகள் உள்ளன.`
+    );
+
+    return true;
+
+  }
+
+
+  /* PERSON LOAN BALANCE */
+
+  if(
+    t.includes("கணக்கில்") &&
+    (
+      t.includes("எவ்வளவு") ||
+      t.includes("இருக்கு")
+    )
   ){
 
     const person =
-      findPersonInText(text);
+      extractPerson(text);
+
 
     if(person){
 
-      const result =
-        personLoanSummary(person);
+      const loans =
+        db.loans.filter(
+          x =>
+            x.name
+              .toLowerCase()
+              .includes(person.toLowerCase())
+        );
 
-      if(result){
 
-        return result;
+      if(loans.length){
+
+        let total = 0;
+
+        let interest = 0;
+
+
+        loans.forEach(x => {
+
+          total +=
+            loanRemaining(x);
+
+          interest +=
+            loanInterest(x);
+
+        });
+
+
+        const reply =
+          `${person} கணக்கில் அசல் மீதி ${money(total)}.\n` +
+          `மாத வட்டி ${money(interest)}.`;
+
+        addAIMessage(reply);
+
+        speakText(
+          `${person} கணக்கில் அசல் மீதி ${money(total)}`
+        );
+
+        return true;
 
       }
 
@@ -2608,703 +2002,7 @@ function processAI(text){
   }
 
 
-  /* -----------------------------------------
-     SALARY QUERY
-  ----------------------------------------- */
-
-  if(
-    s.includes("சம்பளம் வரவு") ||
-    s.includes("சம்பள வரவு")
-  ){
-
-    return `
-💵 சம்பள வரவு
-
-மொத்த வரவு:
-₹${money(db.salaryIn)}
-
-மொத்த செலவு:
-₹${money(db.salaryOut)}
-
-மீதி:
-₹${money(getSalaryBalance())}
-`;
-
-  }
-
-
-  if(
-    s.includes("சம்பளம் மீதி") ||
-    s.includes("சம்பள மீதி") ||
-    s.includes("சம்பளம் எவ்வளவு")
-  ){
-
-    return `
-💵 சம்பள கணக்கு
-
-வரவு:
-₹${money(db.salaryIn)}
-
-செலவு:
-₹${money(db.salaryOut)}
-
-மீதி:
-₹${money(getSalaryBalance())}
-`;
-
-  }
-
-
-  /* -----------------------------------------
-     HOME QUERY
-  ----------------------------------------- */
-
-  if(
-    s.includes("வீட்டு மீதி") ||
-    s.includes("வீடு மீதி")
-  ){
-
-    return `
-🏠 வீட்டு கணக்கு
-
-வரவு:
-₹${money(db.homeIn)}
-
-செலவு:
-₹${money(db.homeOut)}
-
-மீதி:
-₹${money(getHomeBalance())}
-`;
-
-  }
-
-
-  /* -----------------------------------------
-     EXPENSE QUERY
-  ----------------------------------------- */
-
-  if(
-    s.includes("இந்த மாத செலவு") ||
-    s.includes("மாத செலவு")
-  ){
-
-    return `
-🧾 இந்த மாத செலவு
-
-₹${money(getExpenseTotalThisMonth())}
-`;
-
-  }
-
-
-  /* -----------------------------------------
-     LOAN ADD
-  ----------------------------------------- */
-
-  if(isLoanMessage(text)){
-
-    return processLoanAI(text);
-
-  }
-
-
-  /* -----------------------------------------
-     EXPENSE ADD
-  ----------------------------------------- */
-
-  if(isExpenseMessage(text)){
-
-    return processExpenseAI(text);
-
-  }
-
-
-  /* -----------------------------------------
-     SALARY IN
-  ----------------------------------------- */
-
-  if(
-    s.includes("சம்பள வரவு") ||
-    (
-      s.includes("சம்பளம்") &&
-      s.includes("வரவு")
-    )
-  ){
-
-    const amount =
-      parseAmount(text);
-
-    if(amount>0){
-
-      addSalaryAI(
-        "in",
-        amount,
-        "AI சம்பள வரவு"
-      );
-
-      return `
-💵 சம்பள வரவு பதிவு செய்துவிட்டேன்.
-
-வரவு:
-₹${money(amount)}
-
-சம்பள மீதி:
-₹${money(getSalaryBalance())}
-`;
-
-    }
-
-  }
-
-
-  /* -----------------------------------------
-     SALARY OUT
-  ----------------------------------------- */
-
-  if(
-    s.includes("சம்பள செலவு")
-  ){
-
-    const amount =
-      parseAmount(text);
-
-    if(amount>0){
-
-      addSalaryAI(
-        "out",
-        amount,
-        "AI சம்பள செலவு"
-      );
-
-      return `
-💵 சம்பள செலவு பதிவு செய்துவிட்டேன்.
-
-செலவு:
-₹${money(amount)}
-
-சம்பள மீதி:
-₹${money(getSalaryBalance())}
-`;
-
-    }
-
-  }
-
-
-  /* -----------------------------------------
-     SIMPLE BALANCE
-  ----------------------------------------- */
-
-  if(
-    s.includes("மொத்தம்") ||
-    s.includes("நிலைமை") ||
-    s.includes("balance")
-  ){
-
-    return `
-📊 கணக்கு நிலைமை
-
-💵 சம்பள மீதி:
-₹${money(getSalaryBalance())}
-
-🏠 வீட்டு மீதி:
-₹${money(getHomeBalance())}
-
-🧾 இந்த மாத செலவு:
-₹${money(getExpenseTotalThisMonth())}
-
-💰 Loan Accounts:
-${db.loans.length}
-`;
-
-  }
-
-
-  /* -----------------------------------------
-     DEFAULT
-  ----------------------------------------- */
-
-  return `
-இந்த கேள்விக்கான செயலை இன்னும் அமைக்கவில்லை.
-
-நீங்கள் இப்படிச் சொல்லலாம்:
-
-• சம்பள வரவு 20000
-• MMக்கு 500 ரூபாய் மருந்து செலவு செய்தேன்
-• பெட்ரோல் 300 சம்பளத்தில் இருந்து செலவு
-• வீட்டு செலவு 600
-• ராஜாவுக்கு 50000 ரூபாய் 2% வட்டி கொடுத்தேன்
-• யாருக்கெல்லாம் வட்டி பணம் கொடுத்திருக்கோம்?
-• ராஜா கணக்கில் இன்னும் எவ்வளவு இருக்கு?
-• சம்பள மீதி எவ்வளவு?
-• தப்பு
-`;
-
-}
-
-
-/* =========================================================
-   AI SALARY ADD
-   ========================================================= */
-
-function addSalaryAI(type,amount,note){
-
-  const item = {
-
-    id:Date.now(),
-
-    type,
-
-    amount,
-
-    note,
-
-    date:nowText(),
-
-    isoDate:new Date().toISOString()
-
-  };
-
-  db.salaryLogs.unshift(item);
-
-  if(type==="in"){
-
-    db.salaryIn += amount;
-
-  }else{
-
-    db.salaryOut += amount;
-
-  }
-
-  db.lastAction = {
-
-    target:"salaryLog",
-
-    id:item.id
-
-  };
-
-  saveDB();
-
-  renderAll();
-
-}
-
-
-/* =========================================================
-   AI EXPENSE
-   ========================================================= */
-
-function processExpenseAI(text){
-
-  const amount =
-    parseAmount(text);
-
-  if(!amount){
-
-    return `
-செலவு தொகை புரியவில்லை.
-
-உதாரணம்:
-MMக்கு 500 ரூபாய் மருந்து செலவு செய்தேன்
-`;
-
-  }
-
-  const person =
-    parsePerson(text);
-
-  const source =
-    parseSource(text);
-
-  let note =
-    cleanExpenseNote(text);
-
-  if(!note){
-
-    note="AI செலவு";
-
-  }
-
-  const item =
-    addExpense({
-
-      note,
-
-      amount,
-
-      person,
-
-      source,
-
-      silent:true
-
-    });
-
-  return `
-🧾 செலவு பதிவு செய்துவிட்டேன்.
-
-தொகை:
-₹${money(amount)}
-
-குறிப்பு:
-${note}
-
-${
-  person
-    ? `நபர்: ${person}\n`
-    : ""
-}
-
-பணம்:
-${
-  source==="salary"
-    ? "சம்பளம்"
-    : source==="home"
-      ? "வீடு"
-      : "கொல்லை"
-}
-
-${
-  source==="salary"
-    ? `சம்பள மீதி: ₹${money(getSalaryBalance())}`
-    : source==="home"
-      ? `வீட்டு மீதி: ₹${money(getHomeBalance())}`
-      : "கொல்லை செலவில் பதிவு."
-}
-`;
-
-}
-
-
-function cleanExpenseNote(text){
-
-  let s =
-    text.trim();
-
-  s =
-    s.replace(
-      /(\d+(?:\.\d+)?)\s*(ரூபாய்|ரூபா|ரூ|₹)/gi,
-      ""
-    );
-
-  s =
-    s.replace(
-      /(\d+(?:\.\d+)?)\s*(ஆயிரம்|லட்சம்)/gi,
-      ""
-    );
-
-  s =
-    s.replace(
-      /செலவு\s*செய்தேன்/gi,
-      ""
-    );
-
-  s =
-    s.replace(
-      /செலவு\s*செய்தது/gi,
-      ""
-    );
-
-  s =
-    s.replace(
-      /வாங்கியேன்|வாங்கினேன்|வாங்குனேன்/gi,
-      ""
-    );
-
-  s =
-    s.replace(
-      /சம்பளத்தில்\s*இருந்து/gi,
-      ""
-    );
-
-  s =
-    s.replace(
-      /வீட்டு\s*பணத்தில்\s*இருந்து/gi,
-      ""
-    );
-
-  s =
-    s.replace(
-      /MMக்கு|KSக்கு/gi,
-      ""
-    );
-
-  return s
-    .replace(/\s+/g," ")
-    .trim();
-
-}
-
-
-/* =========================================================
-   AI LOAN
-   ========================================================= */
-
-function processLoanAI(text){
-
-  const amount =
-    parseAmount(text);
-
-  if(!amount){
-
-    return `
-வட்டி கணக்கிற்கு அசல் தொகை தேவை.
-
-உதாரணம்:
-
-ராஜாவுக்கு 50000 ரூபாய் 2% வட்டி கொடுத்தேன்
-`;
-
-  }
-
-  const rate =
-    parseRate(text) || 2;
-
-  const person =
-    parsePerson(text) || "பெயர் தெரியவில்லை";
-
-  const date =
-    todayDate();
-
-  const loan = {
-
-    id:Date.now(),
-
-    name:person,
-
-    amount,
-
-    rate,
-
-    startDate:date,
-
-    payments:[],
-
-    created:nowText()
-
-  };
-
-  db.loans.unshift(loan);
-
-  db.lastAction = {
-
-    target:"loan",
-
-    id:loan.id
-
-  };
-
-  saveDB();
-
-  renderAll();
-
-  return `
-💰 Loan Account உருவாக்கிவிட்டேன்.
-
-👤 பெயர்:
-${person}
-
-💵 அசல்:
-₹${money(amount)}
-
-📈 மாத வட்டி:
-${money(rate)}%
-
-🧮 ஒரு மாத வட்டி:
-₹${money(amount*rate/100)}
-
-📅 தொடக்கம்:
-${date}
-
-Loan Account தனியாக சேமிக்கப்பட்டுள்ளது.
-`;
-
-}
-
-
-/* =========================================================
-   PERSON SEARCH
-   ========================================================= */
-
-function findPersonInText(text){
-
-  for(const loan of db.loans){
-
-    if(
-      text.toLowerCase()
-        .includes(
-          loan.name.toLowerCase()
-        )
-    ){
-
-      return loan.name;
-
-    }
-
-  }
-
-  /*
-    "ராஜா கணக்கு"
-    போன்ற input-ல் first meaningful word.
-  */
-
-  const words =
-    text
-      .replace(
-        /கணக்கில்|கணக்கு|எவ்வளவு|மீதம்|இன்னும்|இருக்கு|உள்ளது/g,
-        ""
-      )
-      .trim()
-      .split(/\s+/);
-
-  if(words[0]){
-
-    return words[0];
-
-  }
-
-  return "";
-
-}
-
-
-function personLoanSummary(person){
-
-  const loans =
-    db.loans.filter(
-      x =>
-        x.name.toLowerCase() ===
-        person.toLowerCase()
-    );
-
-  if(!loans.length){
-
-    return null;
-
-  }
-
-  let original=0;
-
-  let interest=0;
-
-  let paid=0;
-
-  let balance=0;
-
-  loans.forEach(x=>{
-
-    original += Number(x.amount);
-
-    interest += loanTotalInterest(x);
-
-    paid += loanPaidAmount(x);
-
-    balance += loanBalance(x);
-
-  });
-
-  return `
-👤 ${person} கணக்கு
-
-📌 Loan Accounts:
-${loans.length}
-
-💵 மொத்த அசல்:
-₹${money(original)}
-
-📈 இதுவரை வட்டி:
-₹${money(interest)}
-
-💰 திருப்பி கொடுத்தது:
-₹${money(paid)}
-
-🧾 மீதமுள்ள அசல்:
-₹${money(balance)}
-
-🔴 மொத்த நிலுவை:
-₹${money(balance+interest)}
-`;
-
-}
-
-
-/* =========================================================
-   ALL LOANS SUMMARY
-   ========================================================= */
-
-function loanSummary(){
-
-  if(!db.loans.length){
-
-    return `
-💰 Loan Account எதுவும் இல்லை.
-`;
-
-  }
-
-  let totalOriginal=0;
-
-  let totalInterest=0;
-
-  let totalPaid=0;
-
-  let totalBalance=0;
-
-  const lines =
-    db.loans.map((loan,i)=>{
-
-      const original =
-        Number(loan.amount);
-
-      const interest =
-        loanTotalInterest(loan);
-
-      const paid =
-        loanPaidAmount(loan);
-
-      const balance =
-        loanBalance(loan);
-
-      totalOriginal += original;
-
-      totalInterest += interest;
-
-      totalPaid += paid;
-
-      totalBalance += balance;
-
-      return `
-${i+1}. ${loan.name}
-   அசல் ₹${money(original)}
-   ${loan.rate}% / மாதம்
-   வட்டி ₹${money(interest)}
-   மீதி ₹${money(balance)}
-`;
-
-    }).join("\n");
-
-  return `
-💰 யாருக்கெல்லாம் Loan / வட்டி கணக்கு
-
-${lines}
-
---------------------
-
-மொத்த அசல்:
-₹${money(totalOriginal)}
-
-மொத்த வட்டி:
-₹${money(totalInterest)}
-
-மொத்தம் திருப்பி கொடுத்தது:
-₹${money(totalPaid)}
-
-மீதமுள்ள அசல்:
-₹${money(totalBalance)}
-`;
+  return false;
 
 }
 
@@ -3315,234 +2013,603 @@ ${lines}
 
 function undoLast(){
 
+  if(!db.lastAction){
+
+    const reply =
+      "நீக்குவதற்கு சமீபத்திய பதிவு இல்லை.";
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return;
+
+  }
+
+
   const action =
     db.lastAction;
 
-  if(!action){
 
-    return "↩️ Undo செய்ய சமீபத்திய செயல் இல்லை.";
+  if(action.action === "account"){
 
-  }
+    const account =
+      db[action.account];
 
 
-  if(
-    action.target==="salaryLog"
-  ){
+    account[action.type === "in"
+      ? "income"
+      : "expense"
+    ] -= action.amount;
 
-    const i =
-      db.salaryLogs.findIndex(
-        x=>x.id===action.id
+
+    const index =
+      account.logs.findIndex(
+        x => x.id === action.logId
       );
 
-    if(i>=0){
 
-      const item =
-        db.salaryLogs[i];
+    if(index >= 0){
 
-      if(item.type==="in"){
-
-        db.salaryIn -= item.amount;
-
-      }else{
-
-        db.salaryOut -= item.amount;
-
-      }
-
-      db.salaryLogs.splice(i,1);
+      account.logs.splice(index,1);
 
     }
 
+
+    db.lastAction = null;
+
+    saveDB();
+
+
+    const reply =
+      "கடைசி கணக்கு பதிவு நீக்கிவிட்டேன்.";
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return;
+
   }
 
 
-  else if(
-    action.target==="expense"
-  ){
+  if(action.action === "expense"){
 
-    const i =
-      db.expenseLogs.findIndex(
-        x=>x.id===action.id
+    const index =
+      db.expenses.findIndex(
+        x => x.id === action.expenseId
       );
 
-    if(i>=0){
+
+    if(index >= 0){
 
       const item =
-        db.expenseLogs[i];
+        db.expenses[index];
 
-      if(item.source==="salary"){
 
-        db.salaryOut -= item.amount;
+      db[action.account].expense -=
+        action.amount;
 
-        db.salaryLogs =
-          db.salaryLogs.filter(
-            x=>x.id!==item.id
-          );
 
-      }
+      const li =
+        db[action.account].logs.findIndex(
+          x =>
+            x.amount === item.amount &&
+            x.note === item.note
+        );
 
-      if(item.source==="home"){
 
-        db.homeOut -= item.amount;
+      if(li >= 0){
 
-        db.homeLogs =
-          db.homeLogs.filter(
-            x=>x.id!==item.id
-          );
+        db[action.account].logs.splice(li,1);
 
       }
 
-      db.expenseLogs.splice(i,1);
+
+      db.expenses.splice(index,1);
 
     }
 
+
+    db.lastAction = null;
+
+    saveDB();
+
+
+    const reply =
+      "கடைசி செலவு நீக்கிவிட்டேன்.";
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return;
+
   }
 
 
-  else if(
-    action.target==="loan"
-  ){
+  if(action.action === "loan"){
 
     db.loans =
       db.loans.filter(
-        x=>x.id!==action.id
+        x => x.id !== action.loanId
       );
+
+
+    db.lastAction = null;
+
+    saveDB();
+
+
+    const reply =
+      "கடைசி வட்டி கணக்கு நீக்கிவிட்டேன்.";
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return;
 
   }
 
 
-  else if(
-    action.target==="homeLog"
-  ){
+  if(action.action === "note"){
 
-    const i =
-      db.homeLogs.findIndex(
-        x=>x.id===action.id
+    db.notes[action.type] =
+      db.notes[action.type].filter(
+        x => x.id !== action.id
       );
 
-    if(i>=0){
 
-      const item =
-        db.homeLogs[i];
+    db.lastAction = null;
 
-      if(item.type==="in"){
+    saveDB();
 
-        db.homeIn -= item.amount;
 
-      }else{
+    const reply =
+      "கடைசி குறிப்பு நீக்கிவிட்டேன்.";
 
-        db.homeOut -= item.amount;
+    addAIMessage(reply);
 
-      }
+    speakText(reply);
 
-      db.homeLogs.splice(i,1);
-
-    }
+    return;
 
   }
 
 
-  db.lastAction=null;
+  if(action.action === "reminder"){
 
-  saveDB();
+    db.reminders =
+      db.reminders.filter(
+        x => x.id !== action.id
+      );
 
-  renderAll();
 
-  return "↩️ கடைசி செயலை நீக்கிவிட்டேன்.";
+    db.lastAction = null;
 
+    saveDB();
+
+
+    const reply =
+      "கடைசி நினைவூட்டல் நீக்கிவிட்டேன்.";
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return;
+
+  }
 
 }
 
 
 /* =========================================================
-   VOICE RECOGNITION
+   MAIN AI
+   ========================================================= */
+
+function sendMessage(){
+
+  const input =
+    document.getElementById("textInput");
+
+
+  const text =
+    input.value.trim();
+
+
+  if(!text){
+
+    return;
+
+  }
+
+
+  addUserMessage(text);
+
+  input.value = "";
+
+
+  const t =
+    text.toLowerCase();
+
+
+  /* UNDO */
+
+  if(
+    t.includes("தப்பு") ||
+    t.includes("தப்பா") ||
+    t.includes("நீக்கு") ||
+    t.includes("அழி") ||
+    t.includes("delete") ||
+    t.includes("undo")
+  ){
+
+    undoLast();
+
+    return;
+
+  }
+
+
+  /* QUERY */
+
+  if(handleQuery(text)){
+
+    return;
+
+  }
+
+
+  /* INCOME */
+
+  if(isIncomeMessage(text)){
+
+    if(handleIncome(text)){
+
+      return;
+
+    }
+
+  }
+
+
+  /* EXPENSE */
+
+  if(isExpenseMessage(text)){
+
+    if(handleExpense(text)){
+
+      return;
+
+    }
+
+  }
+
+
+  /* LOAN */
+
+  if(
+    (
+      t.includes("வட்டி") ||
+      t.includes("கடன்")
+    ) &&
+    parseAmount(text) > 0
+  ){
+
+    const name =
+      extractPerson(text) ||
+      "பெயர் தெரியவில்லை";
+
+
+    const amount =
+      parseAmount(text);
+
+
+    const rate =
+      parseRate(text);
+
+
+    const loan = {
+
+      id:Date.now(),
+
+      name,
+
+      amount,
+
+      rate,
+
+      date:todayISO(),
+
+      paid:0,
+
+      payments:[]
+
+    };
+
+
+    db.loans.push(loan);
+
+
+    db.lastAction = {
+
+      action:"loan",
+
+      loanId:loan.id
+
+    };
+
+
+    saveDB();
+
+
+    const reply =
+      `${name} பெயரில் ${money(amount)} அசல், ${rate}% மாத வட்டி கணக்கு சேர்த்துவிட்டேன்.`;
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return;
+
+  }
+
+
+  /* NOTE */
+
+  if(
+    t.includes("நினைவில் வை") ||
+    t.includes("நோட்டில் எழுது") ||
+    t.includes("குறிப்பு")
+  ){
+
+    db.notes.temp.unshift({
+
+      id:Date.now(),
+
+      text,
+
+      date:nowText()
+
+    });
+
+
+    db.lastAction = {
+
+      action:"note",
+
+      type:"temp",
+
+      id:db.notes.temp[0].id
+
+    };
+
+
+    saveDB();
+
+
+    const reply =
+      "தற்காலிக குறிப்பில் வைத்துவிட்டேன்.";
+
+    addAIMessage(reply);
+
+    speakText(reply);
+
+    return;
+
+  }
+
+
+  /* DEFAULT */
+
+  const reply =
+    "புரிந்துகொள்ள முயற்சி செய்கிறேன். " +
+    "உதாரணமாக, “சம்பளம் வந்தது 20000”, " +
+    "“சம்பள பணத்தில் இருந்து பெட்ரோல் 300”, " +
+    "“வீட்டு பணத்தில் டீ 200” என்று சொல்லலாம்.";
+
+
+  addAIMessage(reply);
+
+  speakText(reply);
+
+}
+
+
+/* =========================================================
+   SPEECH SYNTHESIS
+   ========================================================= */
+
+function speakText(text){
+
+  if(!("speechSynthesis" in window)){
+
+    return;
+
+  }
+
+
+  try{
+
+    window.speechSynthesis.cancel();
+
+
+    const utter =
+      new SpeechSynthesisUtterance(text);
+
+
+    utter.lang = "ta-IN";
+
+    utter.rate = 0.95;
+
+    utter.pitch = 1;
+
+    utter.volume = 1;
+
+
+    window.speechSynthesis.speak(
+      utter
+    );
+
+  }catch(e){
+
+    console.log(e);
+
+  }
+
+}
+
+
+/* =========================================================
+   SPEECH RECOGNITION
    ========================================================= */
 
 let recognition = null;
 
-function setupRecognition(){
+
+function startListening(){
 
   const SpeechRecognition =
     window.SpeechRecognition ||
     window.webkitSpeechRecognition;
 
+
   if(!SpeechRecognition){
+
+    alert(
+      "இந்த browser-ல் தமிழ் Voice Recognition இல்லை."
+    );
 
     return;
 
   }
+
+
+  if(recognition){
+
+    try{
+
+      recognition.stop();
+
+    }catch(e){}
+
+  }
+
 
   recognition =
     new SpeechRecognition();
 
-  recognition.lang="ta-IN";
 
-  recognition.continuous=false;
-
-  recognition.interimResults=true;
-
-  recognition.onstart=()=>{
-
-    setStatus("🎤 கேட்கிறேன்...");
-
-  };
-
-  recognition.onresult=(event)=>{
-
-    let finalText="";
-
-    for(
-      let i=event.resultIndex;
-      i<event.results.length;
-      i++
-    ){
-
-      finalText +=
-        event.results[i][0].transcript;
-
-    }
-
-    document.getElementById(
-      "textInput"
-    ).value=finalText;
-
-  };
-
-  recognition.onerror=(event)=>{
-
-    setStatus(
-      "🎤 Voice error: " +
-      event.error
-    );
-
-  };
-
-  recognition.onend=()=>{
-
-    setStatus("🎤 தயார்");
-
-  };
-
-}
+  recognition.lang =
+    "ta-IN";
 
 
-function startListening(){
+  recognition.continuous =
+    false;
 
-  if(!recognition){
 
-    setupRecognition();
+  recognition.interimResults =
+    true;
 
-  }
 
-  if(!recognition){
+  recognition.maxAlternatives =
+    3;
 
-    alert(
-      "இந்த browser voice input-ஐ support செய்யவில்லை."
-    );
 
-    return;
+  const status =
+    document.getElementById("status");
 
-  }
+
+  status.textContent =
+    "🎤 கேட்கிறேன்... பேசுங்கள்";
+
+
+  recognition.onresult =
+    function(event){
+
+      let finalText = "";
+
+      let interimText = "";
+
+
+      for(
+        let i = event.resultIndex;
+        i < event.results.length;
+        i++
+      ){
+
+        const transcript =
+          event.results[i][0].transcript;
+
+
+        if(event.results[i].isFinal){
+
+          finalText += transcript;
+
+        }else{
+
+          interimText += transcript;
+
+        }
+
+      }
+
+
+      const input =
+        document.getElementById("textInput");
+
+
+      if(finalText){
+
+        input.value =
+          finalText;
+
+
+        status.textContent =
+          "✅ புரிந்தது";
+
+
+        setTimeout(
+          () => sendMessage(),
+          300
+        );
+
+      }else{
+
+        input.value =
+          interimText;
+
+      }
+
+    };
+
+
+  recognition.onerror =
+    function(event){
+
+      status.textContent =
+        "❌ Voice Error: " +
+        event.error;
+
+    };
+
+
+  recognition.onend =
+    function(){
+
+      if(
+        status.textContent.includes("கேட்கிறேன்")
+      ){
+
+        status.textContent =
+          "🎤 தயார்";
+
+      }
+
+    };
+
 
   try{
 
@@ -3569,84 +2636,13 @@ function stopListening(){
 
   }
 
-}
 
-
-function setStatus(text){
-
-  const el =
+  const status =
     document.getElementById("status");
 
-  if(el){
 
-    el.textContent=text;
-
-  }
-
-}
-
-
-/* =========================================================
-   CLEAR CHAT
-   ========================================================= */
-
-function clearChat(){
-
-  const box =
-    document.getElementById("chatBox");
-
-  if(!box) return;
-
-  box.innerHTML=`
-
-    <div class="message ai">
-      வணக்கம்! என்ன செய்ய வேண்டும்?
-    </div>
-
-  `;
-
-  db.chat=[];
-
-  saveDB();
-
-}
-
-
-/* =========================================================
-   LOAD OLD CHAT
-   ========================================================= */
-
-function renderChat(){
-
-  const box =
-    document.getElementById("chatBox");
-
-  if(!box) return;
-
-  if(!db.chat.length){
-
-    return;
-
-  }
-
-  box.innerHTML="";
-
-  db.chat.forEach(x=>{
-
-    const div =
-      document.createElement("div");
-
-    div.className =
-      `message ${x.type}`;
-
-    div.textContent=x.text;
-
-    box.appendChild(div);
-
-  });
-
-  box.scrollTop =
-    box.scrollHeight;
+  status.textContent =
+    "🎤 தயார்";
 
 }
 
@@ -3655,116 +2651,1000 @@ function renderChat(){
    ENTER KEY
    ========================================================= */
 
-function setupEnterKey(){
+document.addEventListener(
+  "keydown",
+  function(e){
 
-  const input =
-    document.getElementById("textInput");
+    if(
+      e.key === "Enter" &&
+      e.target.id === "textInput" &&
+      !e.shiftKey
+    ){
 
-  if(!input) return;
+      e.preventDefault();
 
-  input.addEventListener(
-    "keydown",
-    function(e){
-
-      if(
-        e.key==="Enter" &&
-        !e.shiftKey
-      ){
-
-        e.preventDefault();
-
-        sendMessage();
-
-      }
+      sendMessage();
 
     }
-  );
-
-}
-
-
-/* =========================================================
-   START
-   ========================================================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  ()=>{
-
-    loadDB();
-
-    renderAll();
-
-    renderChat();
-
-    setupRecognition();
-
-    setupEnterKey();
-
-    /*
-      Reminder checker
-    */
-
-    checkReminders();
-
-    setInterval(
-      checkReminders,
-      30000
-    );
 
   }
 );
 
 
 /* =========================================================
-   GLOBAL EXPORTS
-   HTML onclick-க்கு functions கிடைக்க வேண்டும்.
+   RENDER HOME
    ========================================================= */
 
-window.showPage=showPage;
+function renderHome(){
 
-window.sendMessage=sendMessage;
+  const salary =
+    document.getElementById(
+      "summarySalary"
+    );
 
-window.startListening=startListening;
+  const home =
+    document.getElementById(
+      "summaryHome"
+    );
 
-window.stopListening=stopListening;
+  const expense =
+    document.getElementById(
+      "summaryExpense"
+    );
 
-window.clearChat=clearChat;
+  const rem =
+    document.getElementById(
+      "summaryRem"
+    );
 
-window.requestNotifications=requestNotifications;
 
-window.addSalary=addSalary;
+  if(salary){
 
-window.deleteSalary=deleteSalary;
+    salary.textContent =
+      money(balance("salary"));
 
-window.addExpenseManual=addExpenseManual;
+  }
 
-window.deleteExpense=deleteExpense;
 
-window.addFarm=addFarm;
+  if(home){
 
-window.deleteFarm=deleteFarm;
+    home.textContent =
+      money(balance("home"));
 
-window.addHome=addHome;
+  }
 
-window.deleteHome=deleteHome;
 
-window.addLoan=addLoan;
+  if(expense){
 
-window.deleteLoan=deleteLoan;
+    const total =
+      db.expenses.reduce(
+        (s,x) =>
+          s + Number(x.amount || 0),
+        0
+      );
 
-window.addLoanPayment=addLoanPayment;
 
-window.deleteLoanPayment=deleteLoanPayment;
+    expense.textContent =
+      money(total);
 
-window.addNote=addNote;
+  }
 
-window.deleteNote=deleteNote;
 
-window.clearTemporary=clearTemporary;
+  if(rem){
 
-window.addReminder=addReminder;
+    rem.textContent =
+      db.reminders.filter(
+        x => !x.done
+      ).length;
 
-window.completeReminder=completeReminder;
+  }
 
-window.deleteReminder=deleteReminder;
+}
+
+
+/* =========================================================
+   RENDER SALARY
+   ========================================================= */
+
+function renderSalary(){
+
+  const bal =
+    document.getElementById(
+      "salaryBalance"
+    );
+
+
+  if(bal){
+
+    bal.textContent =
+      Number(
+        balance("salary")
+      ).toLocaleString("en-IN");
+
+  }
+
+
+  const list =
+    document.getElementById(
+      "salaryList"
+    );
+
+
+  if(!list) return;
+
+
+  if(!db.salary.logs.length){
+
+    list.innerHTML =
+      `<div class="empty">சம்பள பதிவு இல்லை</div>`;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    db.salary.logs.map(
+      (x,i) => `
+
+      <div class="record">
+
+        <div>
+
+          <b>
+            ${x.type === "in"
+              ? "🟢 வரவு"
+              : "🔴 செலவு"}
+            ${money(x.amount)}
+          </b>
+
+          <small>
+            ${escapeHTML(x.note)}
+            <br>
+            ${escapeHTML(x.date)}
+          </small>
+
+        </div>
+
+        <button
+          class="delete"
+          onclick="deleteSalaryLog(${x.id})">
+          அழி
+        </button>
+
+      </div>
+
+      `
+    ).join("");
+
+}
+
+
+function deleteSalaryLog(id){
+
+  const index =
+    db.salary.logs.findIndex(
+      x => x.id === id
+    );
+
+
+  if(index < 0) return;
+
+
+  const item =
+    db.salary.logs[index];
+
+
+  if(item.type === "in"){
+
+    db.salary.income -=
+      item.amount;
+
+  }else{
+
+    db.salary.expense -=
+      item.amount;
+
+  }
+
+
+  db.salary.logs.splice(
+    index,
+    1
+  );
+
+
+  saveDB();
+
+}
+
+
+/* =========================================================
+   RENDER HOME ACCOUNT
+   ========================================================= */
+
+function renderHomeAccount(){
+
+  const bal =
+    document.getElementById(
+      "homeBalance"
+    );
+
+
+  if(bal){
+
+    bal.textContent =
+      Number(
+        balance("home")
+      ).toLocaleString("en-IN");
+
+  }
+
+
+  const list =
+    document.getElementById(
+      "homeList"
+    );
+
+
+  if(!list) return;
+
+
+  if(!db.home.logs.length){
+
+    list.innerHTML =
+      `<div class="empty">வீட்டு பதிவு இல்லை</div>`;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    db.home.logs.map(
+      x => `
+
+      <div class="record">
+
+        <div>
+
+          <b>
+            ${x.type === "in"
+              ? "🟢 வரவு"
+              : "🔴 செலவு"}
+            ${money(x.amount)}
+          </b>
+
+          <small>
+            ${escapeHTML(x.note)}
+            <br>
+            ${escapeHTML(x.date)}
+          </small>
+
+        </div>
+
+        <button
+          class="delete"
+          onclick="deleteHomeLog(${x.id})">
+          அழி
+        </button>
+
+      </div>
+
+      `
+    ).join("");
+
+}
+
+
+function deleteHomeLog(id){
+
+  const index =
+    db.home.logs.findIndex(
+      x => x.id === id
+    );
+
+
+  if(index < 0) return;
+
+
+  const item =
+    db.home.logs[index];
+
+
+  if(item.type === "in"){
+
+    db.home.income -=
+      item.amount;
+
+  }else{
+
+    db.home.expense -=
+      item.amount;
+
+  }
+
+
+  db.home.logs.splice(
+    index,
+    1
+  );
+
+
+  saveDB();
+
+}
+
+
+/* =========================================================
+   RENDER FARM
+   ========================================================= */
+
+function renderFarm(){
+
+  const list =
+    document.getElementById(
+      "farmList"
+    );
+
+
+  if(!list) return;
+
+
+  if(!db.farm.logs.length){
+
+    list.innerHTML =
+      `<div class="empty">கொல்லை பதிவு இல்லை</div>`;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    db.farm.logs.map(
+      x => `
+
+      <div class="record">
+
+        <div>
+
+          <b>
+            ${x.type === "in"
+              ? "🟢 வரவு"
+              : "🔴 செலவு"}
+            ${money(x.amount)}
+          </b>
+
+          <small>
+            ${escapeHTML(x.note)}
+            <br>
+            ${escapeHTML(x.date)}
+          </small>
+
+        </div>
+
+        <button
+          class="delete"
+          onclick="deleteFarmLog(${x.id})">
+          அழி
+        </button>
+
+      </div>
+
+      `
+    ).join("");
+
+}
+
+
+function deleteFarmLog(id){
+
+  const index =
+    db.farm.logs.findIndex(
+      x => x.id === id
+    );
+
+
+  if(index < 0) return;
+
+
+  const item =
+    db.farm.logs[index];
+
+
+  if(item.type === "in"){
+
+    db.farm.income -=
+      item.amount;
+
+  }else{
+
+    db.farm.expense -=
+      item.amount;
+
+  }
+
+
+  db.farm.logs.splice(
+    index,
+    1
+  );
+
+
+  saveDB();
+
+}
+
+
+/* =========================================================
+   RENDER EXPENSES
+   ========================================================= */
+
+function renderExpenses(){
+
+  const list =
+    document.getElementById(
+      "expenseList"
+    );
+
+
+  if(!list) return;
+
+
+  if(!db.expenses.length){
+
+    list.innerHTML =
+      `<div class="empty">செலவு பதிவு இல்லை</div>`;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    db.expenses.map(
+      x => `
+
+      <div class="record">
+
+        <div>
+
+          <b>
+            🔴 ${escapeHTML(x.note)}
+            ${money(x.amount)}
+          </b>
+
+          <small>
+
+            ${sourceTamil(x.source)}
+
+            ${x.person
+              ? " • " + escapeHTML(x.person)
+              : ""}
+
+            <br>
+
+            ${escapeHTML(x.date)}
+
+          </small>
+
+        </div>
+
+        <button
+          class="delete"
+          onclick="deleteExpense(${x.id})">
+          அழி
+        </button>
+
+      </div>
+
+      `
+    ).join("");
+
+}
+
+
+function sourceTamil(source){
+
+  if(source === "salary")
+    return "💵 சம்பள பணம்";
+
+  if(source === "farm")
+    return "🌾 கொல்லை பணம்";
+
+  return "🏠 வீட்டு பணம்";
+
+}
+
+
+/* =========================================================
+   RENDER LOANS
+   ========================================================= */
+
+function renderLoans(){
+
+  const list =
+    document.getElementById(
+      "loanList"
+    );
+
+
+  if(!list) return;
+
+
+  if(!db.loans.length){
+
+    list.innerHTML =
+      `<div class="empty">Loan Account இல்லை</div>`;
+
+    return;
+
+  }
+
+
+  const grouped = {};
+
+
+  db.loans.forEach(
+    loan => {
+
+      const key =
+        loan.name.trim();
+
+
+      if(!grouped[key]){
+
+        grouped[key] = [];
+
+      }
+
+
+      grouped[key].push(loan);
+
+    }
+  );
+
+
+  list.innerHTML =
+    Object.keys(grouped).map(
+      name => {
+
+        const loans =
+          grouped[name];
+
+
+        const total =
+          loans.reduce(
+            (s,x) =>
+              s + loanRemaining(x),
+            0
+          );
+
+
+        const interest =
+          loans.reduce(
+            (s,x) =>
+              s + loanInterest(x),
+            0
+          );
+
+
+        return `
+
+        <div class="loan-person">
+
+          <div class="loan-person-header">
+
+            <h3>
+              ${escapeHTML(name)}
+            </h3>
+
+            <div class="loan-person-summary">
+
+              அசல் மீதி:
+              <b>${money(total)}</b>
+
+              <br>
+
+              மாத வட்டி:
+              <b>${money(interest)}</b>
+
+            </div>
+
+          </div>
+
+
+          ${loans.map(
+            loan => `
+
+            <div class="loan-account">
+
+              <div class="loan-account-header">
+
+                <b>
+                  ${money(loan.amount)}
+                  @ ${loan.rate}%
+                </b>
+
+                <span>
+                  ${loan.date}
+                </span>
+
+              </div>
+
+
+              <div class="loan-account-body">
+
+                <div class="loan-row">
+
+                  <span>அசல்</span>
+
+                  <b>
+                    ${money(loan.amount)}
+                  </b>
+
+                </div>
+
+
+                <div class="loan-row">
+
+                  <span>திருப்பியது</span>
+
+                  <b>
+                    ${money(loan.paid || 0)}
+                  </b>
+
+                </div>
+
+
+                <div class="loan-row">
+
+                  <span>மீதி</span>
+
+                  <b>
+                    ${money(
+                      loanRemaining(loan)
+                    )}
+                  </b>
+
+                </div>
+
+
+                <div class="loan-row">
+
+                  <span>மாத வட்டி</span>
+
+                  <b>
+                    ${money(
+                      loanInterest(loan)
+                    )}
+                  </b>
+
+                </div>
+
+
+                <div class="loan-actions">
+
+                  <button
+                    class="green"
+                    onclick="addLoanPayment(${loan.id})">
+                    பணம் வந்தது
+                  </button>
+
+                  <button
+                    class="danger"
+                    onclick="deleteLoan(${loan.id})">
+                    அழி
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            `
+          ).join("")}
+
+        </div>
+
+        `;
+
+      }
+    ).join("");
+
+}
+
+
+/* =========================================================
+   RENDER NOTES
+   ========================================================= */
+
+function renderNotes(){
+
+  const temp =
+    document.getElementById(
+      "tempList"
+    );
+
+  const perm =
+    document.getElementById(
+      "permList"
+    );
+
+
+  if(temp){
+
+    temp.innerHTML =
+      db.notes.temp.length
+        ? db.notes.temp.map(
+            x => `
+
+            <div class="record">
+
+              <div>
+
+                <b>
+                  ${escapeHTML(x.text)}
+                </b>
+
+                <small>
+                  ${escapeHTML(x.date)}
+                </small>
+
+              </div>
+
+              <button
+                class="delete"
+                onclick="deleteNote('temp',${x.id})">
+                அழி
+              </button>
+
+            </div>
+
+            `
+          ).join("")
+        : `<div class="empty">
+             தற்காலிக குறிப்பு இல்லை
+           </div>`;
+
+  }
+
+
+  if(perm){
+
+    perm.innerHTML =
+      db.notes.perm.length
+        ? db.notes.perm.map(
+            x => `
+
+            <div class="record">
+
+              <div>
+
+                <b>
+                  ${escapeHTML(x.text)}
+                </b>
+
+                <small>
+                  ${escapeHTML(x.date)}
+                </small>
+
+              </div>
+
+              <button
+                class="delete"
+                onclick="deleteNote('perm',${x.id})">
+                அழி
+              </button>
+
+            </div>
+
+            `
+          ).join("")
+        : `<div class="empty">
+             நிரந்தர குறிப்பு இல்லை
+           </div>`;
+
+  }
+
+}
+
+
+/* =========================================================
+   RENDER REMINDERS
+   ========================================================= */
+
+function renderReminders(){
+
+  const list =
+    document.getElementById(
+      "reminderList"
+    );
+
+
+  if(!list) return;
+
+
+  if(!db.reminders.length){
+
+    list.innerHTML =
+      `<div class="empty">நினைவூட்டல் இல்லை</div>`;
+
+    return;
+
+  }
+
+
+  const now =
+    new Date();
+
+
+  list.innerHTML =
+    db.reminders.map(
+      x => {
+
+        const target =
+          new Date(
+            `${x.date}T${x.time}:00`
+          );
+
+
+        const due =
+          target <= now &&
+          !x.done;
+
+
+        return `
+
+        <div class="record ${
+          due
+            ? "reminder-due"
+            : "reminder-ok"
+        }">
+
+          <div>
+
+            <b>
+              ⏰ ${escapeHTML(x.text)}
+            </b>
+
+            <small>
+
+              ${x.date}
+              ${x.time}
+
+              <br>
+
+              ${x.early} நிமிடம் முன்
+
+              ${
+                x.notified
+                  ? " • 🔔 அறிவிக்கப்பட்டது"
+                  : ""
+              }
+
+            </small>
+
+          </div>
+
+
+          <button
+            class="delete"
+            onclick="deleteReminder(${x.id})">
+            அழி
+          </button>
+
+        </div>
+
+        `;
+
+      }
+    ).join("");
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================================================
+   RENDER ALL
+   ========================================================= */
+
+function renderAll(){
+
+  renderHome();
+
+  renderSalary();
+
+  renderHomeAccount();
+
+  renderFarm();
+
+  renderExpenses();
+
+  renderLoans();
+
+  renderNotes();
+
+  renderReminders();
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
+
+loadDB();
+
+renderAll();
+
+setInterval(
+  checkReminders,
+  30000
+);
+
+setInterval(
+  renderReminders,
+  30000
+);
+
+
+/* =========================================================
+   DEFAULT REMINDER DATE
+   ========================================================= */
+
+window.addEventListener(
+  "load",
+  function(){
+
+    const date =
+      document.getElementById(
+        "reminderDate"
+      );
+
+    if(
+      date &&
+      !date.value
+    ){
+
+      date.value =
+        todayISO();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   GLOBAL ERROR PROTECTION
+   ========================================================= */
+
+window.addEventListener(
+  "error",
+  function(e){
+
+    console.log(
+      "Jacky error:",
+      e.message
+    );
+
+  }
+);
