@@ -1,14 +1,589 @@
-<!doctype html><html lang="ta"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#1e3a8a"><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="style.css"><title>Jacky AI</title></head><body>
-<header><h1>🎙️ ஜாக்கி (Smart PA)</h1><p>கணக்கு • செலவு • வட்டி • நோட்பேட் • நினைவூட்டல்</p></header>
-<nav><button onclick="showPage('home')">🏠 முகப்பு</button><button onclick="showPage('ai')">💬 AI</button><button onclick="showPage('salary')">💵 சம்பளம்</button><button onclick="showPage('expense')">🧾 செலவு</button><button onclick="showPage('farm')">🌾 கொல்லை</button><button onclick="showPage('homeAccount')">🏠 வீடு</button><button onclick="showPage('interest')">💰 வட்டி</button><button onclick="showPage('notes')">📌 நோட்</button><button onclick="showPage('reminders')">⏰ நினைவூட்டல்</button></nav>
+<!doctype html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1e3a8a">
+
+<link rel="manifest" href="manifest.json">
+
+<title>Jacky AI</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial,"Noto Sans Tamil",sans-serif;
+  background:#f3f6fb;
+  color:#172033;
+}
+
+header{
+  background:#1e3a8a;
+  color:white;
+  text-align:center;
+  padding:28px 15px;
+}
+
+header h1{
+  margin:0;
+  font-size:38px;
+  font-weight:800;
+}
+
+header p{
+  margin:12px 0 0;
+  font-size:20px;
+}
+
+nav{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  padding:10px;
+  background:#fff;
+  position:sticky;
+  top:0;
+  z-index:20;
+  box-shadow:0 2px 8px #0002;
+}
+
+nav button{
+  border:0;
+  background:#1e3a8a;
+  color:white;
+  border-radius:10px;
+  padding:11px 14px;
+  white-space:nowrap;
+  font-size:15px;
+}
+
+main{
+  max-width:1000px;
+  margin:auto;
+  padding:14px;
+}
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+.card{
+  background:white;
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:15px;
+  box-shadow:0 3px 15px #0001;
+}
+
+.card h2{
+  margin-top:0;
+  color:#1e3a8a;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+.grid>div{
+  background:#eef3ff;
+  padding:18px;
+  border-radius:14px;
+  text-align:center;
+  font-size:17px;
+}
+
+.grid b{
+  display:block;
+  margin-top:7px;
+  font-size:24px;
+  color:#1e3a8a;
+}
+
+input,
+textarea,
+select{
+  width:100%;
+  padding:13px;
+  margin:6px 0;
+  border:1px solid #cbd5e1;
+  border-radius:10px;
+  font-size:17px;
+  background:white;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+button{
+  border:0;
+  border-radius:10px;
+  padding:12px 16px;
+  margin:5px 3px;
+  background:#1e3a8a;
+  color:white;
+  font-size:16px;
+}
+
+button.purple{
+  background:#7c3aed;
+}
+
+button.danger{
+  background:#c62828;
+}
+
+.record{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  padding:13px;
+  margin:7px 0;
+  background:#f5f7fb;
+  border-radius:12px;
+  border-left:4px solid #1e3a8a;
+}
+
+.record b{
+  display:block;
+  font-size:17px;
+}
+
+.record small{
+  display:block;
+  margin-top:5px;
+  color:#64748b;
+}
+
+.message{
+  padding:13px 16px;
+  margin:9px 0;
+  border-radius:18px;
+  max-width:88%;
+  white-space:pre-wrap;
+  font-size:17px;
+  line-height:1.5;
+}
+
+.message.ai{
+  background:#e8edff;
+  margin-right:auto;
+}
+
+.message.user{
+  background:#d9f8e5;
+  margin-left:auto;
+}
+
+.chat{
+  height:430px;
+  overflow-y:auto;
+  background:#f8fafc;
+  padding:10px;
+  border-radius:15px;
+}
+
+#status{
+  padding:8px;
+  color:#475569;
+}
+
+.loan-person{
+  margin:15px 0;
+  border:2px solid #dbe4ff;
+  border-radius:16px;
+  overflow:hidden;
+}
+
+.loan-person-header{
+  background:#1e3a8a;
+  color:white;
+  padding:15px;
+}
+
+.loan-person-header h3{
+  margin:0;
+  font-size:21px;
+}
+
+.loan-person-summary{
+  margin-top:6px;
+  font-size:14px;
+  opacity:.95;
+}
+
+.loan-account{
+  margin:10px;
+  border:1px solid #d8dee9;
+  border-radius:13px;
+  background:#fff;
+  overflow:hidden;
+}
+
+.loan-account-header{
+  padding:13px;
+  background:#f0f4ff;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+
+.loan-account-header b{
+  color:#1e3a8a;
+}
+
+.loan-account-body{
+  padding:13px;
+}
+
+.loan-row{
+  display:flex;
+  justify-content:space-between;
+  padding:7px 0;
+  border-bottom:1px solid #edf0f5;
+}
+
+.loan-row:last-child{
+  border-bottom:0;
+}
+
+.loan-actions{
+  margin-top:8px;
+}
+
+.empty{
+  padding:15px;
+  text-align:center;
+  color:#64748b;
+}
+
+@media(max-width:600px){
+  header h1{
+    font-size:34px;
+  }
+
+  header p{
+    font-size:17px;
+  }
+
+  .grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .card{
+    padding:14px;
+  }
+
+  button{
+    font-size:15px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🎙️ ஜாக்கி (Smart PA)</h1>
+  <p>கணக்கு • செலவு • வட்டி • நோட்பேட் • நினைவூட்டல்</p>
+</header>
+
+<nav>
+  <button onclick="showPage('home')">🏠 முகப்பு</button>
+  <button onclick="showPage('ai')">💬 AI</button>
+  <button onclick="showPage('salary')">💵 சம்பளம்</button>
+  <button onclick="showPage('expense')">🧾 செலவு</button>
+  <button onclick="showPage('farm')">🌾 கொல்லை</button>
+  <button onclick="showPage('homeAccount')">🏠 வீடு</button>
+  <button onclick="showPage('interest')">💰 வட்டி</button>
+  <button onclick="showPage('notes')">📌 நோட்</button>
+  <button onclick="showPage('reminders')">⏰ நினைவூட்டல்</button>
+</nav>
+
 <main>
-<section id="home" class="page active"><div class="card"><h2>வணக்கம் 👋</h2><div class="grid"><div>சம்பளம் மீதி<br><b id="summarySalary">₹0</b></div><div>வீட்டு மீதி<br><b id="summaryHome">₹0</b></div><div>இந்த மாத செலவு<br><b id="summaryExpense">₹0</b></div><div>நினைவூட்டல்கள்<br><b id="summaryRem">0</b></div></div></div></section>
-<section id="ai" class="page"><div class="card"><h2>💬 ஜாக்கியிடம் பேசுங்கள்</h2><div id="chatBox" class="chat"><div class="message ai">வணக்கம்! என்ன செய்ய வேண்டும்?</div></div><div id="status">🎤 தயார்</div><textarea id="textInput" placeholder="உதா: MMக்கு 500 ரூபாய் மருந்து செலவு செய்தேன்"></textarea><button onclick="sendMessage()">📤 அனுப்பு</button><button class="purple" onclick="startListening()">🎤 மைக்</button><button onclick="stopListening()">⏹️ நிறுத்து</button><button class="danger" onclick="clearChat()">🗑️</button><button onclick="requestNotifications()">🔔 Notification</button></div></section>
-<section id="salary" class="page"><div class="card"><h2>💵 சம்பள கணக்கு</h2><h3>மீதி ₹<span id="salaryBalance">0</span></h3><input id="salaryAmount" type="number" placeholder="தொகை"><input id="salaryNote" placeholder="குறிப்பு"><button onclick="addSalary('in')">+ வரவு</button><button onclick="addSalary('out')">− செலவு</button><div id="salaryList"></div></div></section>
-<section id="expense" class="page"><div class="card"><h2>🧾 ஒருங்கிணைந்த செலவு</h2><input id="expenseNote" placeholder="பெட்ரோல் / மருந்து / சாப்பாடு"><input id="expenseAmount" type="number" placeholder="தொகை"><input id="expensePerson" placeholder="MM / KS (விருப்பம்)"><select id="expenseSource"><option value="home">வீட்டு பணம்</option><option value="salary">சம்பள பணம்</option><option value="farm">கொல்லை பணம்</option></select><button onclick="addExpenseManual()">சேர்</button><div id="expenseList"></div></div></section>
-<section id="farm" class="page"><div class="card"><h2>🌾 கொல்லை கணக்கு</h2><input id="farmAmount" type="number" placeholder="தொகை"><input id="farmNote" placeholder="உரம் / மருந்து"><select id="farmSource"><option value="home">வீட்டு பணம்</option><option value="salary">சம்பள பணம்</option><option value="farm">கொல்லை பணம்</option></select><button onclick="addFarm()">சேர்</button><div id="farmList"></div></div></section>
-<section id="homeAccount" class="page"><div class="card"><h2>🏠 வீட்டு கணக்கு</h2><h3>மீதி ₹<span id="homeBalance">0</span></h3><input id="homeAmount" type="number" placeholder="தொகை"><input id="homeNote" placeholder="குறிப்பு"><button onclick="addHome('in')">+ வரவு</button><button onclick="addHome('out')">− செலவு</button><div id="homeList"></div></div></section>
-<section id="interest" class="page"><div class="card"><h2>💰 வட்டி கணக்கு</h2><input id="loanName" placeholder="பெயர்"><input id="loanAmount" type="number" placeholder="அசல்"><input id="loanRate" type="number" step=".01" placeholder="மாத வட்டி %"><input id="loanDate" type="date"><button onclick="addLoan()">சேர்</button><div id="loanList"></div></div></section>
-<section id="notes" class="page"><div class="card"><h2>📌 நோட்பேட்</h2><input id="tempText" placeholder="தற்காலிக குறிப்பு"><button onclick="addNote('temp')">சேர்</button><button class="danger" onclick="clearTemporary()">அனைத்து தற்காலிக குறிப்பும் அழி</button><div id="tempList"></div><input id="permText" placeholder="நிரந்தர குறிப்பு"><button onclick="addNote('perm')">சேர்</button><div id="permList"></div></div></section>
-<section id="reminders" class="page"><div class="card"><h2>⏰ நினைவூட்டல்</h2><input id="reminderText" placeholder="எதை நினைவூட்ட?"><input id="reminderDate" type="date"><input id="reminderTime" type="time"><input id="reminderEarly" type="number" value="60" placeholder="நிமிடம் முன்"><button onclick="addReminder()">நினைவூட்டு</button><div id="reminderList"></div></div></section>
-</main><script src="app.js?v=3"></script></body></html>
+
+<section id="home" class="page active">
+  <div class="card">
+    <h2>வணக்கம் 👋</h2>
+
+    <div class="grid">
+
+      <div>
+        சம்பளம் மீதி
+        <b id="summarySalary">₹0</b>
+      </div>
+
+      <div>
+        வீட்டு மீதி
+        <b id="summaryHome">₹0</b>
+      </div>
+
+      <div>
+        இந்த மாத செலவு
+        <b id="summaryExpense">₹0</b>
+      </div>
+
+      <div>
+        நினைவூட்டல்கள்
+        <b id="summaryRem">0</b>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<section id="ai" class="page">
+  <div class="card">
+
+    <h2>💬 ஜாக்கியிடம் பேசுங்கள்</h2>
+
+    <div id="chatBox" class="chat">
+      <div class="message ai">
+        வணக்கம்! என்ன செய்ய வேண்டும்?
+      </div>
+    </div>
+
+    <div id="status">🎤 தயார்</div>
+
+    <textarea
+      id="textInput"
+      placeholder="உதா: MMக்கு 500 ரூபாய் மருந்து செலவு செய்தேன்">
+    </textarea>
+
+    <button onclick="sendMessage()">📤 அனுப்பு</button>
+    <button class="purple" onclick="startListening()">🎤 மைக்</button>
+    <button onclick="stopListening()">⏹️ நிறுத்து</button>
+    <button class="danger" onclick="clearChat()">🗑️</button>
+    <button onclick="requestNotifications()">🔔 Notification</button>
+
+  </div>
+</section>
+
+
+<section id="salary" class="page">
+  <div class="card">
+
+    <h2>💵 சம்பள கணக்கு</h2>
+
+    <h3>
+      மீதி ₹<span id="salaryBalance">0</span>
+    </h3>
+
+    <input
+      id="salaryAmount"
+      type="number"
+      placeholder="தொகை">
+
+    <input
+      id="salaryNote"
+      placeholder="குறிப்பு">
+
+    <button onclick="addSalary('in')">+ வரவு</button>
+    <button onclick="addSalary('out')">− செலவு</button>
+
+    <div id="salaryList"></div>
+
+  </div>
+</section>
+
+
+<section id="expense" class="page">
+  <div class="card">
+
+    <h2>🧾 ஒருங்கிணைந்த செலவு</h2>
+
+    <input
+      id="expenseNote"
+      placeholder="பெட்ரோல் / மருந்து / சாப்பாடு">
+
+    <input
+      id="expenseAmount"
+      type="number"
+      placeholder="தொகை">
+
+    <input
+      id="expensePerson"
+      placeholder="MM / KS (விருப்பம்)">
+
+    <select id="expenseSource">
+      <option value="home">வீட்டு பணம்</option>
+      <option value="salary">சம்பள பணம்</option>
+      <option value="farm">கொல்லை பணம்</option>
+    </select>
+
+    <button onclick="addExpenseManual()">சேர்</button>
+
+    <div id="expenseList"></div>
+
+  </div>
+</section>
+
+
+<section id="farm" class="page">
+  <div class="card">
+
+    <h2>🌾 கொல்லை கணக்கு</h2>
+
+    <input
+      id="farmAmount"
+      type="number"
+      placeholder="தொகை">
+
+    <input
+      id="farmNote"
+      placeholder="உரம் / மருந்து">
+
+    <select id="farmSource">
+      <option value="home">வீட்டு பணம்</option>
+      <option value="salary">சம்பள பணம்</option>
+      <option value="farm">கொல்லை பணம்</option>
+    </select>
+
+    <button onclick="addFarm()">சேர்</button>
+
+    <div id="farmList"></div>
+
+  </div>
+</section>
+
+
+<section id="homeAccount" class="page">
+  <div class="card">
+
+    <h2>🏠 வீட்டு கணக்கு</h2>
+
+    <h3>
+      மீதி ₹<span id="homeBalance">0</span>
+    </h3>
+
+    <input
+      id="homeAmount"
+      type="number"
+      placeholder="தொகை">
+
+    <input
+      id="homeNote"
+      placeholder="குறிப்பு">
+
+    <button onclick="addHome('in')">+ வரவு</button>
+    <button onclick="addHome('out')">− செலவு</button>
+
+    <div id="homeList"></div>
+
+  </div>
+</section>
+
+
+<section id="interest" class="page">
+  <div class="card">
+
+    <h2>💰 வட்டி கணக்கு</h2>
+
+    <input
+      id="loanName"
+      placeholder="பெயர்">
+
+    <input
+      id="loanAmount"
+      type="number"
+      placeholder="அசல்">
+
+    <input
+      id="loanRate"
+      type="number"
+      step=".01"
+      placeholder="மாத வட்டி %">
+
+    <input
+      id="loanDate"
+      type="date">
+
+    <button onclick="addLoan()">➕ புதிய Loan Account</button>
+
+    <div id="loanList"></div>
+
+  </div>
+</section>
+
+
+<section id="notes" class="page">
+  <div class="card">
+
+    <h2>📌 நோட்பேட்</h2>
+
+    <input
+      id="tempText"
+      placeholder="தற்காலிக குறிப்பு">
+
+    <button onclick="addNote('temp')">சேர்</button>
+
+    <button
+      class="danger"
+      onclick="clearTemporary()">
+      அனைத்து தற்காலிக குறிப்பும் அழி
+    </button>
+
+    <div id="tempList"></div>
+
+    <input
+      id="permText"
+      placeholder="நிரந்தர குறிப்பு">
+
+    <button onclick="addNote('perm')">சேர்</button>
+
+    <div id="permList"></div>
+
+  </div>
+</section>
+
+
+<section id="reminders" class="page">
+  <div class="card">
+
+    <h2>⏰ நினைவூட்டல்</h2>
+
+    <input
+      id="reminderText"
+      placeholder="எதை நினைவூட்ட?">
+
+    <input
+      id="reminderDate"
+      type="date">
+
+    <input
+      id="reminderTime"
+      type="time">
+
+    <input
+      id="reminderEarly"
+      type="number"
+      value="60"
+      placeholder="நிமிடம் முன்">
+
+    <button onclick="addReminder()">நினைவூட்டு</button>
+
+    <div id="reminderList"></div>
+
+  </div>
+</section>
+
+</main>
+
+<script src="app.js?v=4"></script>
+
+</body>
+</html>
