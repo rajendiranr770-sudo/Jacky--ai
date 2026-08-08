@@ -1,0 +1,9 @@
+{
+  "name": "Jacky AI",
+  "short_name": "Jacky AI",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f6fb",
+  "theme_color": "#1e3a8a",
+  "lang": "ta"
+}
