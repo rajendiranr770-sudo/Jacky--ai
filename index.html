@@ -14,6 +14,10 @@
   box-sizing:border-box;
 }
 
+html{
+  scroll-behavior:smooth;
+}
+
 body{
   margin:0;
   font-family:Arial,"Noto Sans Tamil",sans-serif;
@@ -59,6 +63,11 @@ nav button{
   padding:11px 14px;
   white-space:nowrap;
   font-size:15px;
+  cursor:pointer;
+}
+
+nav button:active{
+  transform:scale(.97);
 }
 
 main{
@@ -134,6 +143,7 @@ button{
   background:#1e3a8a;
   color:white;
   font-size:16px;
+  cursor:pointer;
 }
 
 button.purple{
@@ -165,6 +175,10 @@ button.danger{
   display:block;
   margin-top:5px;
   color:#64748b;
+}
+
+.record button{
+  flex-shrink:0;
 }
 
 .message{
@@ -270,7 +284,14 @@ button.danger{
   color:#64748b;
 }
 
+.balance{
+  font-size:25px;
+  color:#1e3a8a;
+  font-weight:bold;
+}
+
 @media(max-width:600px){
+
   header h1{
     font-size:34px;
   }
@@ -302,21 +323,55 @@ button.danger{
 </header>
 
 <nav>
-  <button onclick="showPage('home')">🏠 முகப்பு</button>
-  <button onclick="showPage('ai')">💬 AI</button>
-  <button onclick="showPage('salary')">💵 சம்பளம்</button>
-  <button onclick="showPage('expense')">🧾 செலவு</button>
-  <button onclick="showPage('farm')">🌾 கொல்லை</button>
-  <button onclick="showPage('homeAccount')">🏠 வீடு</button>
-  <button onclick="showPage('interest')">💰 வட்டி</button>
-  <button onclick="showPage('notes')">📌 நோட்</button>
-  <button onclick="showPage('reminders')">⏰ நினைவூட்டல்</button>
+
+  <button type="button" onclick="showPage('home')">
+    🏠 முகப்பு
+  </button>
+
+  <button type="button" onclick="showPage('ai')">
+    💬 AI
+  </button>
+
+  <button type="button" onclick="showPage('salary')">
+    💵 சம்பளம்
+  </button>
+
+  <button type="button" onclick="showPage('expense')">
+    🧾 செலவு
+  </button>
+
+  <button type="button" onclick="showPage('farm')">
+    🌾 கொல்லை
+  </button>
+
+  <button type="button" onclick="showPage('homeAccount')">
+    🏠 வீடு
+  </button>
+
+  <button type="button" onclick="showPage('interest')">
+    💰 வட்டி
+  </button>
+
+  <button type="button" onclick="showPage('notes')">
+    📌 நோட்
+  </button>
+
+  <button type="button" onclick="showPage('reminders')">
+    ⏰ நினைவூட்டல்
+  </button>
+
 </nav>
 
 <main>
 
+<!-- =====================================================
+     HOME
+===================================================== -->
+
 <section id="home" class="page active">
+
   <div class="card">
+
     <h2>வணக்கம் 👋</h2>
 
     <div class="grid">
@@ -342,66 +397,121 @@ button.danger{
       </div>
 
     </div>
+
   </div>
+
 </section>
 
 
+<!-- =====================================================
+     AI
+===================================================== -->
+
 <section id="ai" class="page">
+
   <div class="card">
 
     <h2>💬 ஜாக்கியிடம் பேசுங்கள்</h2>
 
     <div id="chatBox" class="chat">
+
       <div class="message ai">
         வணக்கம்! என்ன செய்ய வேண்டும்?
       </div>
+
     </div>
 
-    <div id="status">🎤 தயார்</div>
+    <div id="status">
+      🎤 தயார்
+    </div>
 
     <textarea
       id="textInput"
       placeholder="உதா: MMக்கு 500 ரூபாய் மருந்து செலவு செய்தேன்">
     </textarea>
 
-    <button onclick="sendMessage()">📤 அனுப்பு</button>
-    <button class="purple" onclick="startListening()">🎤 மைக்</button>
-    <button onclick="stopListening()">⏹️ நிறுத்து</button>
-    <button class="danger" onclick="clearChat()">🗑️</button>
-    <button onclick="requestNotifications()">🔔 Notification</button>
+    <button type="button" onclick="sendMessage()">
+      📤 அனுப்பு
+    </button>
+
+    <button
+      type="button"
+      class="purple"
+      onclick="startListening()">
+      🎤 மைக்
+    </button>
+
+    <button type="button" onclick="stopListening()">
+      ⏹️ நிறுத்து
+    </button>
+
+    <button
+      type="button"
+      class="danger"
+      onclick="clearChat()">
+      🗑️
+    </button>
+
+    <button
+      type="button"
+      onclick="requestNotifications()">
+      🔔 Notification
+    </button>
 
   </div>
+
 </section>
 
 
+<!-- =====================================================
+     SALARY
+===================================================== -->
+
 <section id="salary" class="page">
+
   <div class="card">
 
     <h2>💵 சம்பள கணக்கு</h2>
 
-    <h3>
+    <h3 class="balance">
       மீதி ₹<span id="salaryBalance">0</span>
     </h3>
 
     <input
       id="salaryAmount"
       type="number"
+      inputmode="decimal"
       placeholder="தொகை">
 
     <input
       id="salaryNote"
       placeholder="குறிப்பு">
 
-    <button onclick="addSalary('in')">+ வரவு</button>
-    <button onclick="addSalary('out')">− செலவு</button>
+    <button
+      type="button"
+      onclick="addSalary('in')">
+      + வரவு
+    </button>
+
+    <button
+      type="button"
+      onclick="addSalary('out')">
+      − செலவு
+    </button>
 
     <div id="salaryList"></div>
 
   </div>
+
 </section>
 
 
+<!-- =====================================================
+     EXPENSE
+===================================================== -->
+
 <section id="expense" class="page">
+
   <div class="card">
 
     <h2>🧾 ஒருங்கிணைந்த செலவு</h2>
@@ -413,6 +523,7 @@ button.danger{
     <input
       id="expenseAmount"
       type="number"
+      inputmode="decimal"
       placeholder="தொகை">
 
     <input
@@ -420,20 +531,40 @@ button.danger{
       placeholder="MM / KS (விருப்பம்)">
 
     <select id="expenseSource">
-      <option value="home">வீட்டு பணம்</option>
-      <option value="salary">சம்பள பணம்</option>
-      <option value="farm">கொல்லை பணம்</option>
+
+      <option value="home">
+        வீட்டு பணம்
+      </option>
+
+      <option value="salary">
+        சம்பள பணம்
+      </option>
+
+      <option value="farm">
+        கொல்லை பணம்
+      </option>
+
     </select>
 
-    <button onclick="addExpenseManual()">சேர்</button>
+    <button
+      type="button"
+      onclick="addExpenseManual()">
+      சேர்
+    </button>
 
     <div id="expenseList"></div>
 
   </div>
+
 </section>
 
 
+<!-- =====================================================
+     FARM
+===================================================== -->
+
 <section id="farm" class="page">
+
   <div class="card">
 
     <h2>🌾 கொல்லை கணக்கு</h2>
@@ -441,6 +572,7 @@ button.danger{
     <input
       id="farmAmount"
       type="number"
+      inputmode="decimal"
       placeholder="தொகை">
 
     <input
@@ -448,47 +580,83 @@ button.danger{
       placeholder="உரம் / மருந்து">
 
     <select id="farmSource">
-      <option value="home">வீட்டு பணம்</option>
-      <option value="salary">சம்பள பணம்</option>
-      <option value="farm">கொல்லை பணம்</option>
+
+      <option value="farm">
+        கொல்லை பணம்
+      </option>
+
+      <option value="home">
+        வீட்டு பணம்
+      </option>
+
+      <option value="salary">
+        சம்பள பணம்
+      </option>
+
     </select>
 
-    <button onclick="addFarm()">சேர்</button>
+    <button
+      type="button"
+      onclick="addFarm()">
+      சேர்
+    </button>
 
     <div id="farmList"></div>
 
   </div>
+
 </section>
 
 
+<!-- =====================================================
+     HOME ACCOUNT
+===================================================== -->
+
 <section id="homeAccount" class="page">
+
   <div class="card">
 
     <h2>🏠 வீட்டு கணக்கு</h2>
 
-    <h3>
+    <h3 class="balance">
       மீதி ₹<span id="homeBalance">0</span>
     </h3>
 
     <input
       id="homeAmount"
       type="number"
+      inputmode="decimal"
       placeholder="தொகை">
 
     <input
       id="homeNote"
       placeholder="குறிப்பு">
 
-    <button onclick="addHome('in')">+ வரவு</button>
-    <button onclick="addHome('out')">− செலவு</button>
+    <button
+      type="button"
+      onclick="addHome('in')">
+      + வரவு
+    </button>
+
+    <button
+      type="button"
+      onclick="addHome('out')">
+      − செலவு
+    </button>
 
     <div id="homeList"></div>
 
   </div>
+
 </section>
 
 
+<!-- =====================================================
+     INTEREST
+===================================================== -->
+
 <section id="interest" class="page">
+
   <div class="card">
 
     <h2>💰 வட்டி கணக்கு</h2>
@@ -500,6 +668,7 @@ button.danger{
     <input
       id="loanAmount"
       type="number"
+      inputmode="decimal"
       placeholder="அசல்">
 
     <input
@@ -512,15 +681,25 @@ button.danger{
       id="loanDate"
       type="date">
 
-    <button onclick="addLoan()">➕ புதிய Loan Account</button>
+    <button
+      type="button"
+      onclick="addLoan()">
+      ➕ புதிய Loan Account
+    </button>
 
     <div id="loanList"></div>
 
   </div>
+
 </section>
 
 
+<!-- =====================================================
+     NOTES
+===================================================== -->
+
 <section id="notes" class="page">
+
   <div class="card">
 
     <h2>📌 நோட்பேட்</h2>
@@ -529,9 +708,14 @@ button.danger{
       id="tempText"
       placeholder="தற்காலிக குறிப்பு">
 
-    <button onclick="addNote('temp')">சேர்</button>
+    <button
+      type="button"
+      onclick="addNote('temp')">
+      சேர்
+    </button>
 
     <button
+      type="button"
       class="danger"
       onclick="clearTemporary()">
       அனைத்து தற்காலிக குறிப்பும் அழி
@@ -543,15 +727,25 @@ button.danger{
       id="permText"
       placeholder="நிரந்தர குறிப்பு">
 
-    <button onclick="addNote('perm')">சேர்</button>
+    <button
+      type="button"
+      onclick="addNote('perm')">
+      சேர்
+    </button>
 
     <div id="permList"></div>
 
   </div>
+
 </section>
 
 
+<!-- =====================================================
+     REMINDERS
+===================================================== -->
+
 <section id="reminders" class="page">
+
   <div class="card">
 
     <h2>⏰ நினைவூட்டல்</h2>
@@ -574,16 +768,22 @@ button.danger{
       value="60"
       placeholder="நிமிடம் முன்">
 
-    <button onclick="addReminder()">நினைவூட்டு</button>
+    <button
+      type="button"
+      onclick="addReminder()">
+      நினைவூட்டு
+    </button>
 
     <div id="reminderList"></div>
 
   </div>
+
 </section>
 
 </main>
 
-<script src="app.js?v=4"></script>
+<!-- IMPORTANT: version changed to v5 -->
+<script src="app.js?v=5"></script>
 
 </body>
 </html>
