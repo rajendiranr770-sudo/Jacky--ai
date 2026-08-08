@@ -55,6 +55,10 @@ nav{
   box-shadow:0 2px 8px #0002;
 }
 
+nav::-webkit-scrollbar{
+  height:4px;
+}
+
 nav button{
   border:0;
   background:#1e3a8a;
@@ -66,8 +70,8 @@ nav button{
   cursor:pointer;
 }
 
-nav button:active{
-  transform:scale(.97);
+nav button.active{
+  background:#172554;
 }
 
 main{
@@ -128,6 +132,7 @@ select{
   border-radius:10px;
   font-size:17px;
   background:white;
+  color:#172033;
 }
 
 textarea{
@@ -146,12 +151,24 @@ button{
   cursor:pointer;
 }
 
+button:hover{
+  opacity:.92;
+}
+
 button.purple{
   background:#7c3aed;
 }
 
 button.danger{
   background:#c62828;
+}
+
+button.gray{
+  background:#64748b;
+}
+
+button.green{
+  background:#15803d;
 }
 
 .record{
@@ -177,8 +194,10 @@ button.danger{
   color:#64748b;
 }
 
-.record button{
+.record .delete{
   flex-shrink:0;
+  background:#c62828;
+  padding:9px 12px;
 }
 
 .message{
@@ -278,16 +297,45 @@ button.danger{
   margin-top:8px;
 }
 
+.loan-actions button{
+  font-size:14px;
+}
+
 .empty{
   padding:15px;
   text-align:center;
   color:#64748b;
 }
 
-.balance{
-  font-size:25px;
+.section-title{
   color:#1e3a8a;
-  font-weight:bold;
+  margin-top:25px;
+}
+
+.balance-positive{
+  color:#15803d;
+}
+
+.balance-negative{
+  color:#c62828;
+}
+
+.ai-help{
+  background:#f0f4ff;
+  border-radius:14px;
+  padding:13px;
+  margin-top:12px;
+  line-height:1.7;
+  color:#334155;
+}
+
+.reminder-due{
+  border-left-color:#c62828;
+  background:#fff1f2;
+}
+
+.reminder-ok{
+  border-left-color:#15803d;
 }
 
 @media(max-width:600px){
@@ -311,6 +359,15 @@ button.danger{
   button{
     font-size:15px;
   }
+
+  .message{
+    font-size:16px;
+  }
+
+  .loan-account-header{
+    flex-direction:column;
+    align-items:flex-start;
+  }
 }
 </style>
 </head>
@@ -324,39 +381,39 @@ button.danger{
 
 <nav>
 
-  <button type="button" onclick="showPage('home')">
+  <button onclick="showPage('home')">
     🏠 முகப்பு
   </button>
 
-  <button type="button" onclick="showPage('ai')">
+  <button onclick="showPage('ai')">
     💬 AI
   </button>
 
-  <button type="button" onclick="showPage('salary')">
+  <button onclick="showPage('salary')">
     💵 சம்பளம்
   </button>
 
-  <button type="button" onclick="showPage('expense')">
+  <button onclick="showPage('expense')">
     🧾 செலவு
   </button>
 
-  <button type="button" onclick="showPage('farm')">
+  <button onclick="showPage('farm')">
     🌾 கொல்லை
   </button>
 
-  <button type="button" onclick="showPage('homeAccount')">
+  <button onclick="showPage('homeAccount')">
     🏠 வீடு
   </button>
 
-  <button type="button" onclick="showPage('interest')">
+  <button onclick="showPage('interest')">
     💰 வட்டி
   </button>
 
-  <button type="button" onclick="showPage('notes')">
+  <button onclick="showPage('notes')">
     📌 நோட்
   </button>
 
-  <button type="button" onclick="showPage('reminders')">
+  <button onclick="showPage('reminders')">
     ⏰ நினைவூட்டல்
   </button>
 
@@ -364,9 +421,7 @@ button.danger{
 
 <main>
 
-<!-- =====================================================
-     HOME
-===================================================== -->
+<!-- HOME -->
 
 <section id="home" class="page active">
 
@@ -403,9 +458,7 @@ button.danger{
 </section>
 
 
-<!-- =====================================================
-     AI
-===================================================== -->
+<!-- AI -->
 
 <section id="ai" class="page">
 
@@ -421,51 +474,54 @@ button.danger{
 
     </div>
 
-    <div id="status">
-      🎤 தயார்
-    </div>
+    <div id="status">🎤 தயார்</div>
 
     <textarea
       id="textInput"
       placeholder="உதா: MMக்கு 500 ரூபாய் மருந்து செலவு செய்தேன்">
     </textarea>
 
-    <button type="button" onclick="sendMessage()">
+    <button onclick="sendMessage()">
       📤 அனுப்பு
     </button>
 
-    <button
-      type="button"
-      class="purple"
-      onclick="startListening()">
+    <button class="purple" onclick="startListening()">
       🎤 மைக்
     </button>
 
-    <button type="button" onclick="stopListening()">
+    <button onclick="stopListening()">
       ⏹️ நிறுத்து
     </button>
 
-    <button
-      type="button"
-      class="danger"
-      onclick="clearChat()">
+    <button class="danger" onclick="clearChat()">
       🗑️
     </button>
 
-    <button
-      type="button"
-      onclick="requestNotifications()">
+    <button onclick="requestNotifications()">
       🔔 Notification
     </button>
+
+    <div class="ai-help">
+
+      <b>உதாரணங்கள்:</b><br>
+
+      • சம்பள வரவு 20000<br>
+      • MMக்கு 500 ரூபாய் மருந்து செலவு செய்தேன்<br>
+      • பெட்ரோல் 300 சம்பளத்தில் இருந்து செலவு<br>
+      • வீட்டு செலவு 600<br>
+      • ராஜாவுக்கு 50000 ரூபாய் 2% வட்டி கொடுத்தேன்<br>
+      • ராஜா கணக்கில் இன்னும் எவ்வளவு இருக்கு?<br>
+      • யாருக்கெல்லாம் வட்டி பணம் கொடுத்திருக்கோம்?<br>
+      • சம்பள வரவு எவ்வளவு?<br>
+      • தப்பு / அழி
+    </div>
 
   </div>
 
 </section>
 
 
-<!-- =====================================================
-     SALARY
-===================================================== -->
+<!-- SALARY -->
 
 <section id="salary" class="page">
 
@@ -473,29 +529,24 @@ button.danger{
 
     <h2>💵 சம்பள கணக்கு</h2>
 
-    <h3 class="balance">
+    <h3>
       மீதி ₹<span id="salaryBalance">0</span>
     </h3>
 
     <input
       id="salaryAmount"
       type="number"
-      inputmode="decimal"
       placeholder="தொகை">
 
     <input
       id="salaryNote"
       placeholder="குறிப்பு">
 
-    <button
-      type="button"
-      onclick="addSalary('in')">
+    <button onclick="addSalary('in')">
       + வரவு
     </button>
 
-    <button
-      type="button"
-      onclick="addSalary('out')">
+    <button onclick="addSalary('out')">
       − செலவு
     </button>
 
@@ -506,9 +557,7 @@ button.danger{
 </section>
 
 
-<!-- =====================================================
-     EXPENSE
-===================================================== -->
+<!-- EXPENSE -->
 
 <section id="expense" class="page">
 
@@ -523,7 +572,6 @@ button.danger{
     <input
       id="expenseAmount"
       type="number"
-      inputmode="decimal"
       placeholder="தொகை">
 
     <input
@@ -546,9 +594,7 @@ button.danger{
 
     </select>
 
-    <button
-      type="button"
-      onclick="addExpenseManual()">
+    <button onclick="addExpenseManual()">
       சேர்
     </button>
 
@@ -559,9 +605,7 @@ button.danger{
 </section>
 
 
-<!-- =====================================================
-     FARM
-===================================================== -->
+<!-- FARM -->
 
 <section id="farm" class="page">
 
@@ -572,7 +616,6 @@ button.danger{
     <input
       id="farmAmount"
       type="number"
-      inputmode="decimal"
       placeholder="தொகை">
 
     <input
@@ -580,10 +623,6 @@ button.danger{
       placeholder="உரம் / மருந்து">
 
     <select id="farmSource">
-
-      <option value="farm">
-        கொல்லை பணம்
-      </option>
 
       <option value="home">
         வீட்டு பணம்
@@ -593,11 +632,13 @@ button.danger{
         சம்பள பணம்
       </option>
 
+      <option value="farm">
+        கொல்லை பணம்
+      </option>
+
     </select>
 
-    <button
-      type="button"
-      onclick="addFarm()">
+    <button onclick="addFarm()">
       சேர்
     </button>
 
@@ -608,9 +649,7 @@ button.danger{
 </section>
 
 
-<!-- =====================================================
-     HOME ACCOUNT
-===================================================== -->
+<!-- HOME ACCOUNT -->
 
 <section id="homeAccount" class="page">
 
@@ -618,29 +657,24 @@ button.danger{
 
     <h2>🏠 வீட்டு கணக்கு</h2>
 
-    <h3 class="balance">
+    <h3>
       மீதி ₹<span id="homeBalance">0</span>
     </h3>
 
     <input
       id="homeAmount"
       type="number"
-      inputmode="decimal"
       placeholder="தொகை">
 
     <input
       id="homeNote"
       placeholder="குறிப்பு">
 
-    <button
-      type="button"
-      onclick="addHome('in')">
+    <button onclick="addHome('in')">
       + வரவு
     </button>
 
-    <button
-      type="button"
-      onclick="addHome('out')">
+    <button onclick="addHome('out')">
       − செலவு
     </button>
 
@@ -651,9 +685,7 @@ button.danger{
 </section>
 
 
-<!-- =====================================================
-     INTEREST
-===================================================== -->
+<!-- LOANS -->
 
 <section id="interest" class="page">
 
@@ -668,7 +700,6 @@ button.danger{
     <input
       id="loanAmount"
       type="number"
-      inputmode="decimal"
       placeholder="அசல்">
 
     <input
@@ -681,9 +712,7 @@ button.danger{
       id="loanDate"
       type="date">
 
-    <button
-      type="button"
-      onclick="addLoan()">
+    <button onclick="addLoan()">
       ➕ புதிய Loan Account
     </button>
 
@@ -694,9 +723,7 @@ button.danger{
 </section>
 
 
-<!-- =====================================================
-     NOTES
-===================================================== -->
+<!-- NOTES -->
 
 <section id="notes" class="page">
 
@@ -704,18 +731,19 @@ button.danger{
 
     <h2>📌 நோட்பேட்</h2>
 
+    <h3 class="section-title">
+      ⏱️ தற்காலிக குறிப்பு
+    </h3>
+
     <input
       id="tempText"
       placeholder="தற்காலிக குறிப்பு">
 
-    <button
-      type="button"
-      onclick="addNote('temp')">
+    <button onclick="addNote('temp')">
       சேர்
     </button>
 
     <button
-      type="button"
       class="danger"
       onclick="clearTemporary()">
       அனைத்து தற்காலிக குறிப்பும் அழி
@@ -723,13 +751,16 @@ button.danger{
 
     <div id="tempList"></div>
 
+
+    <h3 class="section-title">
+      📌 நிரந்தர குறிப்பு
+    </h3>
+
     <input
       id="permText"
       placeholder="நிரந்தர குறிப்பு">
 
-    <button
-      type="button"
-      onclick="addNote('perm')">
+    <button onclick="addNote('perm')">
       சேர்
     </button>
 
@@ -740,9 +771,7 @@ button.danger{
 </section>
 
 
-<!-- =====================================================
-     REMINDERS
-===================================================== -->
+<!-- REMINDERS -->
 
 <section id="reminders" class="page">
 
@@ -768,9 +797,7 @@ button.danger{
       value="60"
       placeholder="நிமிடம் முன்">
 
-    <button
-      type="button"
-      onclick="addReminder()">
+    <button onclick="addReminder()">
       நினைவூட்டு
     </button>
 
@@ -782,7 +809,6 @@ button.danger{
 
 </main>
 
-<!-- IMPORTANT: version changed to v5 -->
 <script src="app.js?v=5"></script>
 
 </body>
