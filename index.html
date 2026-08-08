@@ -1,15 +1,19 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ta">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+>
+
 <meta name="theme-color" content="#1e3a8a">
 
-<link rel="manifest" href="manifest.json">
-
-<title>Jacky AI</title>
+<title>🎙️ ஜாக்கி - Smart PA</title>
 
 <style>
+
 *{
   box-sizing:border-box;
 }
@@ -20,62 +24,102 @@ html{
 
 body{
   margin:0;
-  font-family:Arial,"Noto Sans Tamil",sans-serif;
-  background:#f3f6fb;
+  font-family:
+    "Noto Sans Tamil",
+    "Latha",
+    Arial,
+    sans-serif;
+  background:#f1f5f9;
   color:#172033;
 }
 
+/* =========================
+   HEADER
+========================= */
+
 header{
-  background:#1e3a8a;
-  color:white;
-  text-align:center;
-  padding:28px 15px;
-}
-
-header h1{
-  margin:0;
-  font-size:38px;
-  font-weight:800;
-}
-
-header p{
-  margin:12px 0 0;
-  font-size:20px;
-}
-
-nav{
-  display:flex;
-  gap:7px;
-  overflow-x:auto;
-  padding:10px;
-  background:#fff;
   position:sticky;
   top:0;
-  z-index:20;
-  box-shadow:0 2px 8px #0002;
+  z-index:1000;
+  background:#1e3a8a;
+  color:white;
+  padding:14px 12px;
+  box-shadow:0 3px 12px rgba(0,0,0,.18);
+}
+
+.header-title{
+  text-align:center;
+  font-size:23px;
+  font-weight:700;
+}
+
+.header-sub{
+  text-align:center;
+  font-size:13px;
+  opacity:.9;
+  margin-top:3px;
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+nav{
+  position:sticky;
+  top:76px;
+  z-index:900;
+
+  display:flex;
+  gap:8px;
+
+  padding:10px;
+  overflow-x:auto;
+
+  background:#ffffff;
+  border-bottom:1px solid #dbe2ea;
+
+  scrollbar-width:none;
 }
 
 nav::-webkit-scrollbar{
-  height:4px;
+  display:none;
 }
 
 nav button{
+  flex:0 0 auto;
+
   border:0;
-  background:#1e3a8a;
+  border-radius:14px;
+
+  background:#244493;
   color:white;
-  border-radius:10px;
-  padding:11px 14px;
-  white-space:nowrap;
-  font-size:15px;
+
+  padding:13px 18px;
+
+  font-size:17px;
+  font-weight:600;
+
   cursor:pointer;
+
+  white-space:nowrap;
+}
+
+nav button:hover{
+  opacity:.9;
 }
 
 nav button.active{
-  background:#172554;
+  background:#172e70;
+  box-shadow:0 3px 8px rgba(0,0,0,.18);
 }
 
+/* =========================
+   MAIN
+========================= */
+
 main{
-  max-width:1000px;
+  width:100%;
+  max-width:900px;
   margin:auto;
   padding:14px;
 }
@@ -88,51 +132,99 @@ main{
   display:block;
 }
 
+/* =========================
+   CARD
+========================= */
+
 .card{
   background:white;
-  border-radius:18px;
+
+  border-radius:20px;
+
   padding:18px;
-  margin-bottom:15px;
-  box-shadow:0 3px 15px #0001;
+
+  margin-bottom:16px;
+
+  box-shadow:
+    0 3px 15px rgba(0,0,0,.08);
 }
 
 .card h2{
-  margin-top:0;
+  margin:0 0 14px;
   color:#1e3a8a;
+  font-size:22px;
 }
 
-.grid{
+.card h3{
+  color:#243b78;
+}
+
+/* =========================
+   SUMMARY
+========================= */
+
+.summary-grid{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
+
+  grid-template-columns:
+    repeat(2,1fr);
+
   gap:12px;
 }
 
-.grid>div{
-  background:#eef3ff;
-  padding:18px;
-  border-radius:14px;
-  text-align:center;
-  font-size:17px;
+.summary-card{
+  background:#eef4ff;
+
+  border-radius:16px;
+
+  padding:15px;
+
+  border:1px solid #dce7ff;
 }
 
-.grid b{
-  display:block;
-  margin-top:7px;
-  font-size:24px;
-  color:#1e3a8a;
+.summary-card .label{
+  font-size:14px;
+  color:#5c667a;
 }
+
+.summary-card .value{
+  margin-top:6px;
+  font-size:22px;
+  font-weight:700;
+  color:#17377f;
+}
+
+/* =========================
+   FORM
+========================= */
 
 input,
 textarea,
 select{
   width:100%;
-  padding:13px;
-  margin:6px 0;
+
   border:1px solid #cbd5e1;
-  border-radius:10px;
+
+  border-radius:12px;
+
+  padding:13px;
+
   font-size:17px;
-  background:white;
-  color:#172033;
+
+  outline:none;
+
+  background:#fff;
+
+  margin-bottom:10px;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:#3156a6;
+
+  box-shadow:
+    0 0 0 3px rgba(49,86,166,.12);
 }
 
 textarea{
@@ -140,316 +232,613 @@ textarea{
   resize:vertical;
 }
 
+/* =========================
+   BUTTONS
+========================= */
+
+.button-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
 button{
+  font-family:inherit;
+}
+
+.btn{
   border:0;
-  border-radius:10px;
-  padding:12px 16px;
-  margin:5px 3px;
-  background:#1e3a8a;
-  color:white;
-  font-size:16px;
+
+  border-radius:13px;
+
+  padding:13px 18px;
+
+  font-size:17px;
+
+  font-weight:600;
+
   cursor:pointer;
+
+  color:white;
+
+  background:#244493;
 }
 
-button:hover{
-  opacity:.92;
+.btn:hover{
+  opacity:.9;
 }
 
-button.purple{
+.btn-green{
+  background:#168447;
+}
+
+.btn-red{
+  background:#d32929;
+}
+
+.btn-purple{
   background:#7c3aed;
 }
 
-button.danger{
-  background:#c62828;
+.btn-orange{
+  background:#ea8500;
 }
 
-button.gray{
+.btn-gray{
   background:#64748b;
 }
 
-button.green{
-  background:#15803d;
+/* =========================
+   CHAT
+========================= */
+
+.chat-box{
+  height:430px;
+
+  overflow-y:auto;
+
+  padding:12px;
+
+  background:#f8fafc;
+
+  border-radius:16px;
+
+  border:1px solid #e2e8f0;
+
+  margin-bottom:12px;
 }
+
+.message{
+  max-width:88%;
+
+  padding:13px 15px;
+
+  border-radius:18px;
+
+  margin:8px 0;
+
+  white-space:pre-wrap;
+
+  line-height:1.55;
+
+  font-size:17px;
+}
+
+.message.user{
+  margin-left:auto;
+
+  background:#d9f7e5;
+
+  border-bottom-right-radius:5px;
+}
+
+.message.ai{
+  margin-right:auto;
+
+  background:#e8edff;
+
+  border-bottom-left-radius:5px;
+}
+
+.chat-input-row{
+  display:flex;
+  gap:8px;
+  align-items:stretch;
+}
+
+.chat-input-row textarea{
+  flex:1;
+  margin:0;
+  min-height:60px;
+}
+
+.voice-btn{
+  min-width:72px;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+.status{
+  margin:8px 0 12px;
+
+  font-size:15px;
+
+  color:#475569;
+
+  min-height:24px;
+}
+
+/* =========================
+   RECORDS
+========================= */
 
 .record{
   display:flex;
+
   justify-content:space-between;
+
   align-items:center;
-  gap:10px;
+
+  gap:12px;
+
   padding:13px;
-  margin:7px 0;
-  background:#f5f7fb;
-  border-radius:12px;
-  border-left:4px solid #1e3a8a;
+
+  margin-bottom:9px;
+
+  border-radius:14px;
+
+  background:#f8fafc;
+
+  border:1px solid #e2e8f0;
 }
 
 .record b{
   display:block;
+
   font-size:17px;
 }
 
 .record small{
   display:block;
-  margin-top:5px;
+
   color:#64748b;
-}
 
-.record .delete{
-  flex-shrink:0;
-  background:#c62828;
-  padding:9px 12px;
-}
+  margin-top:5px;
 
-.message{
-  padding:13px 16px;
-  margin:9px 0;
-  border-radius:18px;
-  max-width:88%;
-  white-space:pre-wrap;
-  font-size:17px;
   line-height:1.5;
 }
 
-.message.ai{
-  background:#e8edff;
-  margin-right:auto;
+.delete{
+  flex:0 0 auto;
+
+  border:0;
+
+  border-radius:9px;
+
+  padding:8px 12px;
+
+  background:#dc2626;
+
+  color:white;
+
+  cursor:pointer;
+
+  font-size:14px;
 }
 
-.message.user{
-  background:#d9f8e5;
-  margin-left:auto;
-}
-
-.chat{
-  height:430px;
-  overflow-y:auto;
-  background:#f8fafc;
-  padding:10px;
-  border-radius:15px;
-}
-
-#status{
-  padding:8px;
-  color:#475569;
-}
+/* =========================
+   LOANS
+========================= */
 
 .loan-person{
-  margin:15px 0;
-  border:2px solid #dbe4ff;
-  border-radius:16px;
+  margin-bottom:18px;
+
+  border:1px solid #dbe3ef;
+
+  border-radius:17px;
+
   overflow:hidden;
+
+  background:#fff;
 }
 
 .loan-person-header{
-  background:#1e3a8a;
-  color:white;
   padding:15px;
+
+  background:#eef3ff;
 }
 
 .loan-person-header h3{
-  margin:0;
-  font-size:21px;
+  margin:0 0 8px;
 }
 
 .loan-person-summary{
-  margin-top:6px;
-  font-size:14px;
-  opacity:.95;
+  line-height:1.7;
 }
 
 .loan-account{
-  margin:10px;
-  border:1px solid #d8dee9;
-  border-radius:13px;
-  background:#fff;
+  margin:12px;
+
+  border:1px solid #e2e8f0;
+
+  border-radius:14px;
+
   overflow:hidden;
 }
 
 .loan-account-header{
-  padding:13px;
-  background:#f0f4ff;
   display:flex;
-  justify-content:space-between;
-  gap:10px;
-  align-items:center;
-}
 
-.loan-account-header b{
-  color:#1e3a8a;
+  justify-content:space-between;
+
+  gap:10px;
+
+  padding:12px;
+
+  background:#f8fafc;
 }
 
 .loan-account-body{
-  padding:13px;
+  padding:12px;
 }
 
 .loan-row{
   display:flex;
-  justify-content:space-between;
-  padding:7px 0;
-  border-bottom:1px solid #edf0f5;
-}
 
-.loan-row:last-child{
-  border-bottom:0;
+  justify-content:space-between;
+
+  padding:7px 0;
+
+  border-bottom:1px dashed #e2e8f0;
 }
 
 .loan-actions{
-  margin-top:8px;
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:8px;
+
+  margin-top:12px;
 }
 
 .loan-actions button{
-  font-size:14px;
+  border:0;
+
+  border-radius:10px;
+
+  padding:10px 14px;
+
+  color:white;
+
+  cursor:pointer;
+
+  font-size:15px;
 }
 
-.empty{
-  padding:15px;
-  text-align:center;
-  color:#64748b;
+.green{
+  background:#168447;
 }
 
-.section-title{
-  color:#1e3a8a;
-  margin-top:25px;
+.danger{
+  background:#dc2626;
 }
 
-.balance-positive{
-  color:#15803d;
-}
-
-.balance-negative{
-  color:#c62828;
-}
-
-.ai-help{
-  background:#f0f4ff;
-  border-radius:14px;
-  padding:13px;
-  margin-top:12px;
-  line-height:1.7;
-  color:#334155;
-}
+/* =========================
+   REMINDER
+========================= */
 
 .reminder-due{
-  border-left-color:#c62828;
+  border:2px solid #ef4444;
+
   background:#fff1f2;
 }
 
 .reminder-ok{
-  border-left-color:#15803d;
+  background:#f8fafc;
 }
+
+.reminder-box{
+  background:#fff8e7;
+
+  border:1px solid #f4d28a;
+
+  border-radius:15px;
+
+  padding:14px;
+
+  margin-bottom:15px;
+}
+
+/* =========================
+   EMPTY
+========================= */
+
+.empty{
+  text-align:center;
+
+  padding:22px;
+
+  color:#64748b;
+
+  background:#f8fafc;
+
+  border-radius:12px;
+}
+
+/* =========================
+   DIVIDER
+========================= */
+
+hr{
+  border:0;
+
+  border-top:1px solid #e2e8f0;
+
+  margin:18px 0;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+footer{
+  text-align:center;
+
+  padding:25px 10px;
+
+  color:#64748b;
+
+  font-size:14px;
+}
+
+/* =========================
+   MOBILE
+========================= */
 
 @media(max-width:600px){
 
-  header h1{
-    font-size:34px;
+  .header-title{
+    font-size:20px;
   }
 
-  header p{
-    font-size:17px;
+  nav{
+    top:70px;
   }
 
-  .grid{
-    grid-template-columns:1fr 1fr;
+  nav button{
+    font-size:16px;
+
+    padding:11px 15px;
+  }
+
+  main{
+    padding:10px;
   }
 
   .card{
     padding:14px;
+
+    border-radius:16px;
   }
 
-  button{
-    font-size:15px;
+  .summary-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .summary-card .value{
+    font-size:18px;
   }
 
   .message{
     font-size:16px;
   }
 
-  .loan-account-header{
-    flex-direction:column;
-    align-items:flex-start;
+  .chat-box{
+    height:390px;
   }
+
+  .button-row .btn{
+    flex:1 1 45%;
+  }
+
 }
+
+@media(max-width:390px){
+
+  .summary-grid{
+    grid-template-columns:1fr;
+  }
+
+  .button-row .btn{
+    flex:1 1 100%;
+  }
+
+}
+
 </style>
 </head>
 
 <body>
 
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
 <header>
-  <h1>🎙️ ஜாக்கி (Smart PA)</h1>
-  <p>கணக்கு • செலவு • வட்டி • நோட்பேட் • நினைவூட்டல்</p>
+
+  <div class="header-title">
+    🎙️ ஜாக்கி (Smart PA)
+  </div>
+
+  <div class="header-sub">
+    பாலாஜி சார் அவர்களின் Smart Personal Assistant
+  </div>
+
 </header>
+
+
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
 
 <nav>
 
-  <button onclick="showPage('home')">
+  <button
+    class="active"
+    onclick="showPage('homePage')">
     🏠 முகப்பு
   </button>
 
-  <button onclick="showPage('ai')">
+  <button
+    onclick="showPage('aiPage')">
     💬 AI
   </button>
 
-  <button onclick="showPage('salary')">
+  <button
+    onclick="showPage('salaryPage')">
     💵 சம்பளம்
   </button>
 
-  <button onclick="showPage('expense')">
-    🧾 செலவு
+  <button
+    onclick="showPage('expensePage')">
+    💸 செலவுகள்
   </button>
 
-  <button onclick="showPage('farm')">
+  <button
+    onclick="showPage('farmPage')">
     🌾 கொல்லை
   </button>
 
-  <button onclick="showPage('homeAccount')">
+  <button
+    onclick="showPage('homeAccountPage')">
     🏠 வீடு
   </button>
 
-  <button onclick="showPage('interest')">
-    💰 வட்டி
+  <button
+    onclick="showPage('loanPage')">
+    📊 வட்டி
   </button>
 
-  <button onclick="showPage('notes')">
-    📌 நோட்
+  <button
+    onclick="showPage('notePage')">
+    📌 நோட்பேட்
   </button>
 
-  <button onclick="showPage('reminders')">
+  <button
+    onclick="showPage('reminderPage')">
     ⏰ நினைவூட்டல்
   </button>
 
 </nav>
 
+
 <main>
 
-<!-- HOME -->
 
-<section id="home" class="page active">
+<!-- =====================================================
+     HOME PAGE
+===================================================== -->
+
+<section
+  id="homePage"
+  class="page active">
 
   <div class="card">
 
-    <h2>வணக்கம் 👋</h2>
+    <h2>🏠 முகப்பு</h2>
 
-    <div class="grid">
+    <div class="summary-grid">
 
-      <div>
-        சம்பளம் மீதி
-        <b id="summarySalary">₹0</b>
+      <div class="summary-card">
+
+        <div class="label">
+          💵 சம்பள மீதி
+        </div>
+
+        <div
+          class="value"
+          id="summarySalary">
+          ₹0
+        </div>
+
       </div>
 
-      <div>
-        வீட்டு மீதி
-        <b id="summaryHome">₹0</b>
+
+      <div class="summary-card">
+
+        <div class="label">
+          🏠 வீட்டு மீதி
+        </div>
+
+        <div
+          class="value"
+          id="summaryHome">
+          ₹0
+        </div>
+
       </div>
 
-      <div>
-        இந்த மாத செலவு
-        <b id="summaryExpense">₹0</b>
+
+      <div class="summary-card">
+
+        <div class="label">
+          💸 மொத்த செலவு
+        </div>
+
+        <div
+          class="value"
+          id="summaryExpense">
+          ₹0
+        </div>
+
       </div>
 
-      <div>
-        நினைவூட்டல்கள்
-        <b id="summaryRem">0</b>
+
+      <div class="summary-card">
+
+        <div class="label">
+          ⏰ நினைவூட்டல்கள்
+        </div>
+
+        <div
+          class="value"
+          id="summaryRem">
+          0
+        </div>
+
       </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>⚡ விரைவான செயல்</h2>
+
+    <div class="button-row">
+
+      <button
+        class="btn"
+        onclick="showPage('aiPage')">
+        💬 AI-யிடம் சொல்லுங்கள்
+      </button>
+
+      <button
+        class="btn btn-orange"
+        onclick="showPage('reminderPage')">
+        ⏰ நினைவூட்டல்
+      </button>
+
+      <button
+        class="btn btn-purple"
+        onclick="showPage('notePage')">
+        📌 நோட்பேட்
+      </button>
 
     </div>
 
@@ -458,62 +847,97 @@ button.green{
 </section>
 
 
-<!-- AI -->
+<!-- =====================================================
+     AI PAGE
+===================================================== -->
 
-<section id="ai" class="page">
+<section
+  id="aiPage"
+  class="page">
 
   <div class="card">
 
-    <h2>💬 ஜாக்கியிடம் பேசுங்கள்</h2>
+    <h2>💬 ஜாக்கி AI</h2>
 
-    <div id="chatBox" class="chat">
+    <div
+      id="chatBox"
+      class="chat-box">
 
       <div class="message ai">
-        வணக்கம்! என்ன செய்ய வேண்டும்?
+        வணக்கம் பாலாஜி சார்! என்ன செய்ய வேண்டும்?
       </div>
 
     </div>
 
-    <div id="status">🎤 தயார்</div>
 
-    <textarea
-      id="textInput"
-      placeholder="உதா: MMக்கு 500 ரூபாய் மருந்து செலவு செய்தேன்">
-    </textarea>
+    <div
+      id="status"
+      class="status">
+      🎤 தயார்
+    </div>
 
-    <button onclick="sendMessage()">
-      📤 அனுப்பு
-    </button>
 
-    <button class="purple" onclick="startListening()">
-      🎤 மைக்
-    </button>
+    <div class="chat-input-row">
 
-    <button onclick="stopListening()">
-      ⏹️ நிறுத்து
-    </button>
+      <textarea
+        id="textInput"
+        placeholder="உதாரணம்: சம்பளம் வந்தது 20000&#10;அல்லது சம்பள பணத்தில் இருந்து பெட்ரோல் 500"
+      ></textarea>
 
-    <button class="danger" onclick="clearChat()">
-      🗑️
-    </button>
+      <button
+        class="btn btn-purple voice-btn"
+        onclick="startListening()">
+        🎤
+      </button>
 
-    <button onclick="requestNotifications()">
-      🔔 Notification
-    </button>
+    </div>
 
-    <div class="ai-help">
 
-      <b>உதாரணங்கள்:</b><br>
+    <div
+      class="button-row"
+      style="margin-top:10px;">
 
-      • சம்பள வரவு 20000<br>
-      • MMக்கு 500 ரூபாய் மருந்து செலவு செய்தேன்<br>
-      • பெட்ரோல் 300 சம்பளத்தில் இருந்து செலவு<br>
-      • வீட்டு செலவு 600<br>
-      • ராஜாவுக்கு 50000 ரூபாய் 2% வட்டி கொடுத்தேன்<br>
-      • ராஜா கணக்கில் இன்னும் எவ்வளவு இருக்கு?<br>
-      • யாருக்கெல்லாம் வட்டி பணம் கொடுத்திருக்கோம்?<br>
-      • சம்பள வரவு எவ்வளவு?<br>
-      • தப்பு / அழி
+      <button
+        class="btn"
+        onclick="sendMessage()">
+        📤 அனுப்பு
+      </button>
+
+      <button
+        class="btn btn-red"
+        onclick="clearChat()">
+        🗑️ Chat அழி
+      </button>
+
+      <button
+        class="btn btn-gray"
+        onclick="stopListening()">
+        ⏹️ நிறுத்து
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>💡 உதாரணங்கள்</h2>
+
+    <div class="empty">
+
+      சம்பளம் வந்தது 20000<br><br>
+
+      சம்பள பணத்தில் இருந்து பெட்ரோல் 500<br><br>
+
+      வீட்டுப் பணத்தில் டீ 200<br><br>
+
+      கொல்லை பணத்தில் உரம் 1500<br><br>
+
+      முருகன் கிட்ட 10000 வட்டி 2%<br><br>
+
+      நினைவில் வை நாளைக்கு பால் வாங்க வேண்டும்
+
     </div>
 
   </div>
@@ -521,34 +945,67 @@ button.green{
 </section>
 
 
-<!-- SALARY -->
+<!-- =====================================================
+     SALARY PAGE
+===================================================== -->
 
-<section id="salary" class="page">
+<section
+  id="salaryPage"
+  class="page">
 
   <div class="card">
 
-    <h2>💵 சம்பள கணக்கு</h2>
+    <h2>💵 சம்பளக் கணக்கு</h2>
 
-    <h3>
-      மீதி ₹<span id="salaryBalance">0</span>
-    </h3>
+    <div class="summary-card">
+
+      <div class="label">
+        மீதி தொகை
+      </div>
+
+      <div
+        class="value"
+        id="salaryBalance">
+        0
+      </div>
+
+    </div>
+
+    <br>
 
     <input
       id="salaryAmount"
       type="number"
-      placeholder="தொகை">
+      inputmode="decimal"
+      placeholder="தொகை ₹">
 
     <input
       id="salaryNote"
+      type="text"
       placeholder="குறிப்பு">
 
-    <button onclick="addSalary('in')">
-      + வரவு
-    </button>
+    <div class="button-row">
 
-    <button onclick="addSalary('out')">
-      − செலவு
-    </button>
+      <button
+        class="btn btn-green"
+        onclick="addSalary('in')">
+        ➕ வரவு
+      </button>
+
+      <button
+        class="btn btn-red"
+        onclick="addSalary('out')">
+        ➖ செலவு
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>📋 சம்பள பதிவுகள்</h2>
 
     <div id="salaryList"></div>
 
@@ -557,46 +1014,62 @@ button.green{
 </section>
 
 
-<!-- EXPENSE -->
+<!-- =====================================================
+     EXPENSE PAGE
+===================================================== -->
 
-<section id="expense" class="page">
+<section
+  id="expensePage"
+  class="page">
 
   <div class="card">
 
-    <h2>🧾 ஒருங்கிணைந்த செலவு</h2>
+    <h2>💸 செலவு பதிவு</h2>
 
     <input
       id="expenseNote"
-      placeholder="பெட்ரோல் / மருந்து / சாப்பாடு">
+      type="text"
+      placeholder="எதற்காக செலவு?">
 
     <input
       id="expenseAmount"
       type="number"
-      placeholder="தொகை">
+      inputmode="decimal"
+      placeholder="தொகை ₹">
 
     <input
       id="expensePerson"
-      placeholder="MM / KS (விருப்பம்)">
+      type="text"
+      placeholder="யாருக்காக / யாரிடம்?">
 
     <select id="expenseSource">
 
       <option value="home">
-        வீட்டு பணம்
+        🏠 வீட்டு பணம்
       </option>
 
       <option value="salary">
-        சம்பள பணம்
+        💵 சம்பள பணம்
       </option>
 
       <option value="farm">
-        கொல்லை பணம்
+        🌾 கொல்லை பணம்
       </option>
 
     </select>
 
-    <button onclick="addExpenseManual()">
-      சேர்
+    <button
+      class="btn btn-red"
+      onclick="addExpenseManual()">
+      ➖ செலவு சேர்
     </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>📋 செலவு பட்டியல்</h2>
 
     <div id="expenseList"></div>
 
@@ -605,42 +1078,57 @@ button.green{
 </section>
 
 
-<!-- FARM -->
+<!-- =====================================================
+     FARM PAGE
+===================================================== -->
 
-<section id="farm" class="page">
+<section
+  id="farmPage"
+  class="page">
 
   <div class="card">
 
-    <h2>🌾 கொல்லை கணக்கு</h2>
+    <h2>🌾 கொல்லைக் கணக்கு</h2>
+
+    <input
+      id="farmNote"
+      type="text"
+      placeholder="எதற்கான செலவு? உதா: உரம்">
 
     <input
       id="farmAmount"
       type="number"
-      placeholder="தொகை">
-
-    <input
-      id="farmNote"
-      placeholder="உரம் / மருந்து">
+      inputmode="decimal"
+      placeholder="தொகை ₹">
 
     <select id="farmSource">
 
+      <option value="farm">
+        🌾 கொல்லை பணம்
+      </option>
+
       <option value="home">
-        வீட்டு பணம்
+        🏠 வீட்டு பணம்
       </option>
 
       <option value="salary">
-        சம்பள பணம்
-      </option>
-
-      <option value="farm">
-        கொல்லை பணம்
+        💵 சம்பள பணம்
       </option>
 
     </select>
 
-    <button onclick="addFarm()">
-      சேர்
+    <button
+      class="btn btn-green"
+      onclick="addFarm()">
+      ➕ பதிவு செய்
     </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>📋 கொல்லை பதிவுகள்</h2>
 
     <div id="farmList"></div>
 
@@ -649,34 +1137,67 @@ button.green{
 </section>
 
 
-<!-- HOME ACCOUNT -->
+<!-- =====================================================
+     HOME ACCOUNT PAGE
+===================================================== -->
 
-<section id="homeAccount" class="page">
+<section
+  id="homeAccountPage"
+  class="page">
 
   <div class="card">
 
     <h2>🏠 வீட்டு கணக்கு</h2>
 
-    <h3>
-      மீதி ₹<span id="homeBalance">0</span>
-    </h3>
+    <div class="summary-card">
+
+      <div class="label">
+        மீதி தொகை
+      </div>
+
+      <div
+        class="value"
+        id="homeBalance">
+        0
+      </div>
+
+    </div>
+
+    <br>
 
     <input
       id="homeAmount"
       type="number"
-      placeholder="தொகை">
+      inputmode="decimal"
+      placeholder="தொகை ₹">
 
     <input
       id="homeNote"
+      type="text"
       placeholder="குறிப்பு">
 
-    <button onclick="addHome('in')">
-      + வரவு
-    </button>
+    <div class="button-row">
 
-    <button onclick="addHome('out')">
-      − செலவு
-    </button>
+      <button
+        class="btn btn-green"
+        onclick="addHome('in')">
+        ➕ வரவு
+      </button>
+
+      <button
+        class="btn btn-red"
+        onclick="addHome('out')">
+        ➖ செலவு
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>📋 வீட்டு பதிவுகள்</h2>
 
     <div id="homeList"></div>
 
@@ -685,36 +1206,52 @@ button.green{
 </section>
 
 
-<!-- LOANS -->
+<!-- =====================================================
+     LOAN PAGE
+===================================================== -->
 
-<section id="interest" class="page">
+<section
+  id="loanPage"
+  class="page">
 
   <div class="card">
 
-    <h2>💰 வட்டி கணக்கு</h2>
+    <h2>📊 வட்டி / கடன் கணக்கு</h2>
 
     <input
       id="loanName"
+      type="text"
       placeholder="பெயர்">
 
     <input
       id="loanAmount"
       type="number"
-      placeholder="அசல்">
+      inputmode="decimal"
+      placeholder="அசல் தொகை ₹">
 
     <input
       id="loanRate"
       type="number"
-      step=".01"
+      inputmode="decimal"
+      step="0.01"
       placeholder="மாத வட்டி %">
 
     <input
       id="loanDate"
       type="date">
 
-    <button onclick="addLoan()">
-      ➕ புதிய Loan Account
+    <button
+      class="btn btn-green"
+      onclick="addLoan()">
+      ➕ வட்டி கணக்கு சேர்
     </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>📋 வட்டி கணக்குகள்</h2>
 
     <div id="loanList"></div>
 
@@ -723,46 +1260,60 @@ button.green{
 </section>
 
 
-<!-- NOTES -->
+<!-- =====================================================
+     NOTE PAGE
+===================================================== -->
 
-<section id="notes" class="page">
+<section
+  id="notePage"
+  class="page">
 
   <div class="card">
 
-    <h2>📌 நோட்பேட்</h2>
+    <h2>⏱️ தற்காலிக நோட்பேட்</h2>
 
-    <h3 class="section-title">
-      ⏱️ தற்காலிக குறிப்பு
-    </h3>
-
-    <input
+    <textarea
       id="tempText"
-      placeholder="தற்காலிக குறிப்பு">
+      placeholder="தற்காலிகமாக நினைவில் வைத்துக்கொள்ள வேண்டியது..."></textarea>
 
-    <button onclick="addNote('temp')">
-      சேர்
-    </button>
+    <div class="button-row">
 
-    <button
-      class="danger"
-      onclick="clearTemporary()">
-      அனைத்து தற்காலிக குறிப்பும் அழி
-    </button>
+      <button
+        class="btn"
+        onclick="addNote('temp')">
+        📌 சேமி
+      </button>
+
+      <button
+        class="btn btn-red"
+        onclick="clearTemporary()">
+        🗑️ அனைத்தும் அழி
+      </button>
+
+    </div>
+
+    <hr>
 
     <div id="tempList"></div>
 
+  </div>
 
-    <h3 class="section-title">
-      📌 நிரந்தர குறிப்பு
-    </h3>
 
-    <input
+  <div class="card">
+
+    <h2>📌 நிரந்தர நோட்பேட்</h2>
+
+    <textarea
       id="permText"
-      placeholder="நிரந்தர குறிப்பு">
+      placeholder="நிரந்தரமாக வைத்திருக்க வேண்டிய குறிப்பு..."></textarea>
 
-    <button onclick="addNote('perm')">
-      சேர்
+    <button
+      class="btn btn-green"
+      onclick="addNote('perm')">
+      💾 நிரந்தரமாக சேமி
     </button>
+
+    <hr>
 
     <div id="permList"></div>
 
@@ -771,35 +1322,84 @@ button.green{
 </section>
 
 
-<!-- REMINDERS -->
+<!-- =====================================================
+     REMINDER PAGE
+===================================================== -->
 
-<section id="reminders" class="page">
+<section
+  id="reminderPage"
+  class="page">
 
   <div class="card">
 
     <h2>⏰ நினைவூட்டல்</h2>
 
+    <div class="reminder-box">
+
+      <b>🔔 முக்கியம்</b>
+
+      <p>
+        நினைவூட்டலை உருவாக்கிய பிறகு
+        Notification அனுமதியை கொடுக்கவும்.
+      </p>
+
+      <button
+        class="btn btn-orange"
+        onclick="requestNotifications()">
+        🔔 Notification அனுமதி
+      </button>
+
+    </div>
+
+
     <input
       id="reminderText"
-      placeholder="எதை நினைவூட்ட?">
+      type="text"
+      placeholder="எதை நினைவூட்ட வேண்டும்?">
+
+
+    <label>
+      📅 தேதி
+    </label>
 
     <input
       id="reminderDate"
       type="date">
 
+
+    <label>
+      🕐 நேரம்
+    </label>
+
     <input
       id="reminderTime"
       type="time">
 
+
+    <label>
+      ⏰ எத்தனை நிமிடம் முன்பு?
+    </label>
+
     <input
       id="reminderEarly"
       type="number"
-      value="60"
-      placeholder="நிமிடம் முன்">
+      min="0"
+      value="0"
+      placeholder="உதா: 10">
 
-    <button onclick="addReminder()">
-      நினைவூட்டு
+
+    <button
+      class="btn btn-green"
+      onclick="addReminder()">
+      🔔 நினைவூட்டல் சேர்
     </button>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>📋 நினைவூட்டல்கள்</h2>
 
     <div id="reminderList"></div>
 
@@ -807,9 +1407,23 @@ button.green{
 
 </section>
 
+
 </main>
 
-<script src="app.js?v=6"></script>
+
+<footer>
+
+  🎙️ ஜாக்கி Smart PA<br>
+  உங்கள் தனிப்பட்ட கணக்கு மற்றும் நினைவூட்டல் உதவியாளர்
+
+</footer>
+
+
+<!-- =====================================================
+     APP JS
+===================================================== -->
+
+<script src="app.js"></script>
 
 </body>
 </html>
